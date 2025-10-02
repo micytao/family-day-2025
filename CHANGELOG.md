@@ -1,5 +1,121 @@
 # Changelog - Red Hat Family Day 2025 AI Vision Quest
 
+## Version 0.3 - Age-Appropriate Prompts & UX Enhancements
+
+### 🎯 Major Changes
+
+#### Prompt Tuning for Kids Ages 5-10
+All game mode prompts have been optimized specifically for children ages 5-10, balancing accuracy with encouragement:
+
+1. **🎨 Colors Mode**
+   - Accepts same color family and shades (light/dark variations)
+   - Says NO only if completely different color
+   - Example: "Show me red" → accepts red, pink, burgundy ✅
+
+2. **🔢 Counting Mode**
+   - Tolerates ±1 variance for counting challenges
+   - Says NO only if off by more than 2
+   - Example: "Show me 3 things" → accepts 2, 3, or 4 items ✅
+
+3. **😊 Emotions Mode**
+   - Encourages exaggerated expressions (kids' enthusiasm!)
+   - Says NO only if clearly a different emotion
+   - Helps kids learn emotional expression
+
+4. **🧘 Yoga Mode**
+   - Accepts good attempts (doesn't need perfect form)
+   - Says NO only if clearly a completely different pose
+   - Focus on trying, not perfection
+
+5. **✋ Body Parts Mode**
+   - Clear validation for correct body part visibility
+   - Educational but encouraging
+
+6. **🔍 Scavenger Hunt & Actions Mode**
+   - Supportive approach for finding objects/doing actions
+   - Says NO only if clearly not there or completely wrong
+
+**Philosophy:** "Encouraging and educational" - helps kids learn while keeping the game fun!
+
+#### Editable Prompts During Gameplay
+- Prompt text area now remains editable during active game sessions
+- Allows real-time prompt tuning based on AI responses
+- Parents/facilitators can adjust difficulty on the fly
+- Other controls (model, interval, base URL) remain locked for stability
+
+#### Enhanced Modal Notifications
+Replaced basic JavaScript `alert()` dialogs with beautiful styled modals:
+
+1. **Design Improvements**
+   - Gradient backgrounds matching game theme
+   - Smooth pop-in animations with bounce effect
+   - Backdrop blur for professional look
+   - Consistent styling with leaderboard
+
+2. **Notifications Updated**
+   - ⭐ "Already completed challenge" notification
+   - ⚠️ "Name required" for leaderboard entry
+   - ❌ "Incorrect password" for admin actions
+
+3. **Interaction**
+   - Click button to close
+   - Click outside modal to dismiss
+   - Smooth fade transitions
+
+### 🎮 Prompt Examples
+
+**Before (Strict):**
+```
+IMPORTANT: If you see red, you MUST start with YES.
+```
+
+**After (Balanced for Ages 5-10):**
+```
+This is for kids ages 5-10 learning colors. Say YES if you see red 
+(or similar shades like light/dark red). Be encouraging but accurate - 
+they should have the right color family! Say NO if it's a completely 
+different color.
+```
+
+### 🎨 UX Improvements Summary
+
+| Feature | Before | After |
+|---------|--------|-------|
+| Color Matching | Exact match only | Color family + shades ✅ |
+| Counting Tolerance | None | ±1 acceptable ✅ |
+| Yoga Poses | Perfect form required | Good effort accepted ✅ |
+| Emotions | Strict | Exaggerations welcomed ✅ |
+| Prompt Editing | Locked during game | Always editable ✅ |
+| Notifications | Basic alerts | Styled modals ✅ |
+
+### 📝 Technical Details
+
+#### Prompt Engineering Approach
+```javascript
+// All prompts now include age context
+"This is for kids ages 5-10 learning [concept]"
+
+// Encouraging language
+"Be encouraging and help them learn!"
+
+// Clear success criteria with tolerance
+"Say YES if approximately correct (within ±1 is okay)"
+
+// Reduced false negatives
+"Say NO only if significantly off / completely different"
+```
+
+### 🎉 Result
+
+The game is now better suited for Family Day:
+- ✅ Age-appropriate difficulty (5-10 years old)
+- ✅ Balanced between fun and learning
+- ✅ Fewer frustrating false negatives
+- ✅ More polished, professional UI
+- ✅ Flexible for facilitators (editable prompts)
+
+---
+
 ## Version 0.2 - Enhanced Qwen Model & Kid-Friendly Improvements
 
 ### 🎯 Major Changes

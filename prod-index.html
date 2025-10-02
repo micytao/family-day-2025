@@ -890,6 +890,81 @@
             filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
         }
         
+        /* Modal notification overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, var(--card-bg), var(--card-hover));
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            border: 3px solid var(--border-color);
+            animation: modalPop 0.3s ease-out;
+            text-align: center;
+        }
+        
+        .modal-content h3 {
+            font-size: 2rem;
+            margin: 0 0 1rem 0;
+            color: var(--primary-color);
+        }
+        
+        .modal-content p {
+            font-size: 1.2rem;
+            margin: 0 0 1.5rem 0;
+            color: var(--text-primary);
+        }
+        
+        .modal-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-purple));
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes modalPop {
+            0% { 
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
         @keyframes celebrationPop {
             0% { 
                 transform: translate(-50%, -50%) scale(0) rotate(-180deg); 
@@ -1754,7 +1829,7 @@
                     }
                 }, 100);
             } else {
-                alert('❌ Incorrect password! Leaderboard not cleared.');
+                showModal('❌ Incorrect Password', 'The password you entered is incorrect. Leaderboard not cleared.', 'Try Again');
                 document.getElementById('adminPasswordInput').value = '';
                 document.getElementById('adminPasswordInput').focus();
             }
@@ -1810,7 +1885,7 @@
             const playerName = document.getElementById('playerNameInput').value.trim();
             
             if (!playerName) {
-                alert('Please enter a name!');
+                showModal('⚠️ Name Required', 'Please enter your name to save your score! 🏆', 'OK');
                 return;
             }
             
@@ -2022,7 +2097,7 @@
         function selectChallenge(challenge, cardElement) {
             // Check if challenge is already completed
             if (gameState.completedChallenges.has(challenge.id)) {
-                alert('⭐ You already completed this challenge! Pick a new one! 🎮');
+                showModal('⭐ Already Completed!', 'You already completed this challenge! Pick a new one to keep playing! 🎮', 'Choose Another! 🎯');
                 return;
             }
             
@@ -2041,7 +2116,7 @@
             if (mode === 'colors') {
                 // Check if it's asking for specific color (YES/NO) or describing (open-ended)
                 if (challengeLower.includes('what colors')) {
-                    prompt = `Look at this image and describe what you see. List all the colors you can see in the image. Be specific and descriptive about the colors present.`;
+                    prompt = `Look at this image and describe what you see. List all the colors you can see in the image. This is for kids ages 5-10 learning colors - be encouraging and help them identify colors!`;
                 } else {
                     // Extract the specific color from the challenge
                     let specificColor = '';
@@ -2053,12 +2128,12 @@
                         }
                     }
                     
-                    prompt = `Look at this image! Do you see any ${specificColor ? specificColor : 'this color'} color? \n\nIMPORTANT: If you see ${specificColor ? specificColor : 'the color'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                    prompt = `Look at this image! Do you see any ${specificColor ? specificColor : 'this color'} color? \n\nThis is for kids ages 5-10 learning colors. Say YES if you see ${specificColor ? specificColor : 'the color'} (or similar shades like light/dark ${specificColor ? specificColor : 'color'}). Be encouraging but accurate - they should have the right color family! Say NO if it's a completely different color.\n\nFormat: YES - [reason] or NO - [reason]`;
                 }
             } else if (mode === 'counting') {
                 // Check if it's asking to count (open-ended) or show specific number (YES/NO)
                 if (challengeLower.includes('how many') || challengeLower.includes('count')) {
-                    prompt = `Look at this image. Count what you see and tell me the number. The challenge is: "${cleanChallenge}". Be specific about the quantity you see.`;
+                    prompt = `Look at this image. Count what you see and tell me the number. The challenge is: "${cleanChallenge}". This is for kids ages 5-10 - be encouraging and specific about what you count!`;
                 } else {
                     // Extract the number from the challenge
                     let extractedNumber = '';
@@ -2067,12 +2142,12 @@
                         extractedNumber = numberMatch[0];
                     }
                     
-                    prompt = `Look at this image! Can you see ${extractedNumber ? extractedNumber : 'that many'} things?\n\nIMPORTANT: If you see ${extractedNumber ? extractedNumber : 'that many'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                    prompt = `Look at this image! Can you see ${extractedNumber ? extractedNumber : 'that many'} things?\n\nThis is for kids ages 5-10 learning to count. Say YES if they're showing approximately ${extractedNumber ? extractedNumber : 'that many'} things (within +/- 1 is okay). Be encouraging and help them learn! Say NO only if the count is significantly off (like more than 2 away).\n\nFormat: YES - [reason] or NO - [reason]`;
                 }
             } else if (mode === 'bodyparts') {
                 // For body parts, make sure it's the correct part
                 if (challengeLower.includes('how many') || challengeLower.includes('count')) {
-                    prompt = `Look at this image. Count what you see and tell me the number. The challenge is: "${cleanChallenge}". Be specific about the quantity you see.`;
+                    prompt = `Look at this image. Count what you see and tell me the number. The challenge is: "${cleanChallenge}". This is for kids ages 5-10 - be encouraging and help them learn to count body parts!`;
                 } else {
                     // Extract the specific body part from the challenge
                     let specificPart = '';
@@ -2084,7 +2159,7 @@
                         }
                     }
                     
-                    prompt = `Look at this image! Can you see ${specificPart ? specificPart : 'this body part'}?\n\nIMPORTANT: If you see ${specificPart ? specificPart : 'it'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                    prompt = `Look at this image! Can you see ${specificPart ? specificPart : 'this body part'}?\n\nThis is for kids ages 5-10 learning body parts. Say YES if you can clearly see ${specificPart ? specificPart : 'the body part'} in the image. Be encouraging if they're showing the right thing! Say NO if it's a different body part or not visible.\n\nFormat: YES - [reason] or NO - [reason]`;
                 }
             } else if (mode === 'emotions') {
                 // For emotions, look for clear expressions
@@ -2098,7 +2173,7 @@
                     }
                 }
                 
-                prompt = `Look at this image! Can you see a ${specificEmotion ? specificEmotion : 'this'} face or expression?\n\nIMPORTANT: If you see a ${specificEmotion ? specificEmotion : 'this'} expression, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                prompt = `Look at this image! Can you see a ${specificEmotion ? specificEmotion : 'this'} face or expression?\n\nThis is for kids ages 5-10 learning emotions. Say YES if you can see a ${specificEmotion ? specificEmotion : 'this'} expression or face - kids may exaggerate expressions and that's great! Be encouraging. Say NO if the expression is clearly different.\n\nFormat: YES - [reason] or NO - [reason]`;
             } else if (mode === 'yoga') {
                 // For extreme yoga poses - check if they're doing the pose
                 // Extract the specific yoga pose from the challenge
@@ -2111,7 +2186,7 @@
                     }
                 }
                 
-                prompt = `Look at this image! Is someone doing ${specificPose ? specificPose + ' pose' : 'this pose'}?\n\nIMPORTANT: If someone is doing ${specificPose ? specificPose + ' pose' : 'the pose'}, you MUST start with YES. If not, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                prompt = `Look at this image! Is someone doing ${specificPose ? specificPose + ' pose' : 'this pose'}?\n\nThis is for kids ages 5-10 trying yoga poses. Say YES if they're attempting ${specificPose ? specificPose + ' pose' : 'the pose'} - it doesn't have to be perfect, just a good effort! Kids are learning and having fun. Say NO only if they're clearly doing a completely different pose.\n\nFormat: YES - [reason] or NO - [reason]`;
             } else {
                 // For scavenger and actions - use YES/NO format
                 // Try to extract key items/actions from the challenge
@@ -2134,7 +2209,7 @@
                 else if (challengeLower.includes('peace')) keyItem = 'a PEACE SIGN';
                 else if (challengeLower.includes('heart')) keyItem = 'a HEART shape made with hands';
                 
-                prompt = `Look at this image! Can you see ${keyItem || 'this'}?\n\nIMPORTANT: If you see ${keyItem || 'it'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                prompt = `Look at this image! Can you see ${keyItem || 'this'}?\n\nThis is for kids ages 5-10 on a scavenger hunt or doing actions. Say YES if you can see ${keyItem || 'what they need to show'} in the image - be encouraging! Say NO only if it's clearly not there or they're showing something completely different.\n\nFormat: YES - [reason] or NO - [reason]`;
             }
             
             instructionText.value = prompt;
@@ -2246,6 +2321,45 @@
                     document.body.removeChild(celebration);
                 }
             }, 1500);
+        }
+        
+        function showModal(title, message, buttonText = 'Got it! 🎮') {
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            
+            // Create modal content
+            const modal = document.createElement('div');
+            modal.className = 'modal-content';
+            
+            const titleElement = document.createElement('h3');
+            titleElement.textContent = title;
+            
+            const messageElement = document.createElement('p');
+            messageElement.textContent = message;
+            
+            const button = document.createElement('button');
+            button.className = 'modal-button';
+            button.textContent = buttonText;
+            button.onclick = () => {
+                document.body.removeChild(overlay);
+            };
+            
+            // Assemble modal
+            modal.appendChild(titleElement);
+            modal.appendChild(messageElement);
+            modal.appendChild(button);
+            overlay.appendChild(modal);
+            
+            // Add to page
+            document.body.appendChild(overlay);
+            
+            // Close on overlay click
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    document.body.removeChild(overlay);
+                }
+            });
         }
         
         function createConfetti() {
@@ -2830,8 +2944,8 @@
             startButton.classList.remove('btn-primary');
             startButton.classList.add('btn-danger');
 
-            // Disable controls
-            instructionText.disabled = true;
+            // Disable controls (except instructionText - keep it editable for on-the-fly prompt tuning!)
+            // instructionText.disabled = true;  // Keeping this editable!
             modelSelect.disabled = true;
             intervalSelect.disabled = true;
             baseURL.disabled = true;

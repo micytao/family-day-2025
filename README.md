@@ -28,7 +28,8 @@ An interactive AI-powered vision game for Red Hat Family Day 2025! Kids and fami
 - **Smart Vision Model:** Qwen/Qwen2-VL-2B-Instruct (2B parameters)
 - **Real-time Processing:** 1-second intervals for fast gameplay
 - **Intelligent Judging:** AI explains why it says YES or NO
-- **Kid-Friendly:** Optimized for family fun with forgiving validation
+- **Age-Appropriate:** Prompts tuned specifically for kids ages 5-10
+- **Balanced Difficulty:** Encouraging but educational (±1 counting tolerance, color family matching)
 
 ### 🏆 Scoring System
 - Points for completing challenges
@@ -42,7 +43,8 @@ An interactive AI-powered vision game for Red Hat Family Day 2025! Kids and fami
 - Animated celebrations and confetti
 - Dark mode support
 - Responsive layout for all devices
-- Themed modals with bounce animations
+- Styled modals with smooth animations (no more basic alerts!)
+- Editable prompts during gameplay for real-time tuning
 
 ## 🚀 Quick Start
 
