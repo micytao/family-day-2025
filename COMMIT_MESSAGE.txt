@@ -1,0 +1,59 @@
+🎉 v0.2: Upgrade to Qwen2-VL-2B & Kid-Friendly Improvements
+
+Major Enhancements:
+✅ Model Upgrade: SmolVLM-500M → Qwen2-VL-2B-Instruct (4x larger, much better!)
+✅ AI Explanations: Now explains WHY it says YES or NO
+✅ Smarter Validation: Infers positive responses from descriptions
+✅ Faster Gameplay: 1-second interval (down from 2s)
+✅ Styled Modals: Beautiful challenge selection prompt
+✅ Documentation: Comprehensive README, CHANGELOG, and guides
+
+Game Improvements:
+- AI now provides explanations with every decision
+- Intelligent inference: "You are holding a book" → Awards points!
+- Clearer prompts with "IMPORTANT: You MUST start with YES"
+- Better response display with ✅/❌ indicators
+- 3-layer validation: Explicit YES, Inference, Negative Override
+
+Technical Changes:
+- Model: Qwen/Qwen2-VL-2B-Instruct (2B params, excellent instruction following)
+- Token limit: 50 → 100 (for explanations)
+- Temperature: 0 (maximum determinism)
+- Request interval: 2s → 1s (default)
+
+UI Enhancements:
+- Replaced alert() with themed modal for challenge selection
+- Keyboard support (ESC/Enter) for modals
+- Enhanced response text with clear YES/NO indicators
+- Better feedback for open-ended questions
+
+Documentation Updates:
+- New README.md with comprehensive project overview
+- New CHANGELOG.md tracking version history
+- Updated all deployment guides with Qwen model info
+- Updated PRODUCTION_README.md, CONTAINER_DEPLOYMENT.md
+- Updated QUICK_START.md with vLLM as primary option
+
+Files Modified:
+✏️  prod-index.html - Main production app with all improvements
+✏️  deploy-to-openshift.sh - Updated model name
+✏️  PRODUCTION_README.md - Qwen model documentation
+✏️  PRODUCTION_DEPLOYMENT.md - Updated prerequisites
+✏️  CONTAINER_DEPLOYMENT.md - Updated model info
+✏️  QUICK_START.md - Added vLLM as Option A
+📝  README.md - New comprehensive documentation
+📝  CHANGELOG.md - New version history
+📝  COMMIT_MESSAGE.txt - This file
+
+Result:
+🎮 Game is now 4x smarter, faster, and more fun for kids!
+🤖 AI provides clear explanations for every decision
+👨‍👩‍👧‍👦 Perfect for Red Hat Family Day 2025!
+
+Testing:
+✅ Tested with Qwen2-VL-2B-Instruct
+✅ Verified smart validation with inference
+✅ Confirmed 1-second interval works smoothly
+✅ All modals working correctly
+✅ No linter errors
+

@@ -1,0 +1,42 @@
+# Secrets and sensitive files
+*.secret
+*-secret.yml
+.env
+.env.local
+
+# HuggingFace tokens
+hf-token.txt
+huggingface-token.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Node modules (if using npm)
+node_modules/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Container build artifacts
+*.tar
+*.tar.gz
+

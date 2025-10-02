@@ -1,0 +1,2979 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+    PRODUCTION VERSION - Optimized for OpenShift with vLLM
+    
+    This version is configured to work with Red Hat AI Inference Server (vLLM)
+    running on OpenShift in a different namespace.
+    
+    vLLM Configuration:
+    - Model: Qwen/Qwen2-VL-2B-Instruct
+    - Default port: 8000
+    - API endpoint: /v1/chat/completions (OpenAI-compatible)
+    - Deployment: Cross-namespace service on OpenShift
+    
+    Usage:
+    1. Deploy this app on OpenShift
+    2. Configure route/ingress to proxy /v1/* requests to vLLM service
+    3. Click "OpenShift Proxy" button to use relative path (recommended)
+    4. Or manually enter vLLM service URL for testing
+    
+    Test function included to verify vLLM connectivity before running the game.
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎩 Red Hat Family Day 2025 - AI Vision Quest! 🎮 [PRODUCTION]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fredoka:wght@300;400;500;600;700&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Fun, vibrant colors for kids! */
+            --primary-color: #ff6b9d;
+            --primary-hover: #ff4d84;
+            --secondary-color: #c7f0ff;
+            --success-color: #4ade80;
+            --success-hover: #22c55e;
+            --danger-color: #ff6b6b;
+            --danger-hover: #ff5252;
+            --warning-color: #fbbf24;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-muted: #718096;
+            --bg-primary: #ffffff;
+            --bg-secondary: #fef3f9;
+            --bg-tertiary: #e0f2fe;
+            --border-color: #ffc9e0;
+            --border-focus: #ff6b9d;
+            --accent-purple: #c084fc;
+            --accent-blue: #60a5fa;
+            --accent-yellow: #fcd34d;
+            --accent-green: #4ade80;
+            --shadow-sm: 0 1px 2px 0 rgb(255 107 157 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(255 107 157 / 0.2), 0 2px 4px -2px rgb(255 107 157 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(255 107 157 / 0.2), 0 4px 6px -4px rgb(255 107 157 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(255 107 157 / 0.3), 0 8px 10px -6px rgb(255 107 157 / 0.2);
+            --radius-sm: 0.5rem;
+            --radius-md: 1rem;
+            --radius-lg: 1.25rem;
+            --radius-xl: 1.5rem;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #818cf8;
+            --primary-hover: #6366f1;
+            --secondary-color: #374151;
+            --success-color: #34d399;
+            --success-hover: #10b981;
+            --danger-color: #f87171;
+            --danger-hover: #ef4444;
+            --warning-color: #fbbf24;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --bg-primary: #1f2937;
+            --bg-secondary: #111827;
+            --bg-tertiary: #374151;
+            --border-color: #4b5563;
+            --border-focus: #818cf8;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Comic Neue', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fef3f9 0%, #e0f2fe 50%, #fef9c3 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Fun animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(96, 165, 250, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(192, 132, 252, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            gap: 1.5rem;
+            grid-template-areas: 
+                "header header header"
+                "score score score"
+                "video controls challenges"
+                "inputs inputs leaderboard";
+            grid-template-columns: 1fr 400px 300px;
+            grid-template-rows: auto auto 1fr auto;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-areas: 
+                    "header"
+                    "score"
+                    "video"
+                    "controls"
+                    "challenges"
+                    "inputs"
+                    "leaderboard";
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .redhat-text {
+                font-size: 2rem;
+            }
+            
+            .fedora-icon {
+                width: 50px;
+                height: 50px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .redhat-text {
+                font-size: 1.5rem;
+            }
+            
+            .fedora-icon {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .party-emoji {
+                font-size: 2rem;
+            }
+            
+            .deco-emoji {
+                font-size: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .redhat-title {
+                gap: 0.5rem;
+                flex-wrap: wrap;
+                text-align: center;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+        }
+
+        .header {
+            grid-area: header;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-primary);
+            padding: 1.5rem 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Red Hat Branding */
+        .redhat-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .fedora-icon {
+            width: 70px;
+            height: 70px;
+            filter: drop-shadow(0 4px 8px rgba(238, 0, 0, 0.4));
+            animation: fedoraBounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes fedoraBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(-5deg); }
+        }
+        
+        .redhat-text {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #EE0000;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            text-shadow: 
+                3px 3px 0px #FFFFFF,
+                4px 4px 0px #000000,
+                0 0 30px rgba(238, 0, 0, 0.5);
+            letter-spacing: 0.03em;
+            transform: rotate(-2deg);
+            animation: cartoonBounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes cartoonBounce {
+            0%, 100% { transform: rotate(-2deg) translateY(0); }
+            50% { transform: rotate(2deg) translateY(-5px); }
+        }
+        
+        @keyframes redhatShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Party Emoji Decorations */
+        .party-emoji {
+            font-size: 3rem;
+            animation: partyBounce 1s ease-in-out infinite;
+            display: inline-block;
+        }
+        
+        .party-emoji-2 {
+            animation: partyBounce 1s ease-in-out infinite 0.5s;
+        }
+        
+        @keyframes partyBounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(15deg); }
+        }
+        
+        /* Floating emoji decorations */
+        .emoji-decorations {
+            position: relative;
+            width: 100%;
+            height: 30px;
+            text-align: center;
+        }
+        
+        .deco-emoji {
+            font-size: 1.5rem;
+            position: absolute;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0.9;
+        }
+        
+        .deco-1 {
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .deco-2 {
+            left: 25%;
+            animation-delay: 0.5s;
+        }
+        
+        .deco-3 {
+            left: 50%;
+            transform: translateX(-50%);
+            animation-delay: 1s;
+        }
+        
+        .deco-4 {
+            right: 25%;
+            animation-delay: 1.5s;
+        }
+        
+        .deco-5 {
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg); 
+                opacity: 0.9;
+            }
+            50% { 
+                transform: translateY(-10px) rotate(10deg); 
+                opacity: 1;
+            }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b9d, #c084fc, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: rainbowShift 3s ease-in-out infinite;
+        }
+        
+        @keyframes rainbowShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(20deg); }
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-size: 1.25rem;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .video-section {
+            grid-area: video;
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        #videoFeed {
+            width: 100%;
+            aspect-ratio: 4/3;
+            border-radius: var(--radius-lg);
+            background: #000;
+            object-fit: cover;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        #videoFeed:hover {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .controls-section {
+            grid-area: controls;
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            appearance: none;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+            background: var(--bg-primary);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--success-hover), var(--success-color));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), var(--danger-hover));
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, var(--danger-hover), var(--danger-color));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .preset-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .inputs-section {
+            grid-area: inputs;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .inputs-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-card {
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+            background: var(--bg-primary);
+        }
+
+        textarea[readonly] {
+            background: var(--bg-tertiary);
+            cursor: default;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .status-ready {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-processing {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: currentColor;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: var(--radius-sm);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+        
+        /* Score Board Styles */
+        .score-board {
+            grid-area: score;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 0;
+        }
+        
+        .score-card {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 3px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .score-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .score-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .score-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0.25rem 0;
+        }
+        
+        .score-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Challenges Section */
+        .challenges-section {
+            grid-area: challenges;
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 3px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .challenges-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .challenge-card {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border-radius: var(--radius-lg);
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .challenge-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        
+        .challenge-content {
+            flex: 1;
+        }
+        
+        .challenge-card:hover {
+            transform: translateX(5px);
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .challenge-card.active {
+            border-color: var(--accent-green);
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.2), rgba(74, 222, 128, 0.1));
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+        }
+        
+        .challenge-card.completed {
+            opacity: 0.6;
+            background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+            border-color: #999;
+            cursor: not-allowed;
+            pointer-events: all;
+        }
+        
+        .challenge-card.completed:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .completed-badge {
+            font-size: 1.5rem;
+            animation: checkmarkPop 0.5s ease-out;
+        }
+        
+        @keyframes checkmarkPop {
+            0% { transform: scale(0) rotate(-180deg); }
+            50% { transform: scale(1.3) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .challenge-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .challenge-points {
+            display: inline-block;
+            background: var(--accent-yellow);
+            color: var(--text-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: auto;
+        }
+        
+        .difficulty-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .difficulty-easy { background: var(--success-color); color: white; }
+        .difficulty-medium { background: var(--warning-color); color: white; }
+        .difficulty-hard { background: var(--danger-color); color: white; }
+        
+        /* Confetti Animation */
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background-color: var(--primary-color);
+            animation: confetti-fall 3s linear forwards;
+            z-index: 9999;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+        }
+        
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* Bounce animation for buttons */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .btn-bounce {
+            animation: bounce 2s infinite;
+        }
+        
+        /* Success celebration */
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10rem;
+            z-index: 10000;
+            animation: celebrationPop 1.5s ease-out forwards;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8),
+                         0 0 60px rgba(255, 107, 157, 0.6),
+                         0 0 90px rgba(192, 132, 252, 0.4);
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+        }
+        
+        @keyframes celebrationPop {
+            0% { 
+                transform: translate(-50%, -50%) scale(0) rotate(-180deg); 
+                opacity: 0; 
+            }
+            40% { 
+                transform: translate(-50%, -50%) scale(1.3) rotate(10deg); 
+                opacity: 1; 
+            }
+            60% { 
+                transform: translate(-50%, -50%) scale(1.2) rotate(-5deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(0) rotate(180deg); 
+                opacity: 0; 
+            }
+        }
+        
+        /* Timer display */
+        .timer-display {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .timer-display.warning {
+            color: var(--danger-color);
+            animation: pulse 1s infinite;
+        }
+        
+        /* Streak indicator */
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #ff6b9d, #ff9a76);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-md);
+            animation: pulse 2s infinite;
+        }
+        
+        /* Game mode selector */
+        .game-mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .mode-btn {
+            padding: 0.75rem 0.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+        
+        .mode-btn.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .mode-btn:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-purple));
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Leaderboard Styles */
+        .leaderboard-section {
+            grid-area: leaderboard;
+            background: var(--bg-primary);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 3px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .leaderboard-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+        
+        .leaderboard-container {
+            margin-top: 0;
+            padding-top: 0;
+        }
+        
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        
+        .leaderboard-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .leaderboard-item.rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-color: #ffd700;
+            font-weight: 700;
+        }
+        
+        .leaderboard-item.rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            border-color: #c0c0c0;
+            font-weight: 600;
+        }
+        
+        .leaderboard-item.rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #e8a87c);
+            border-color: #cd7f32;
+            font-weight: 600;
+        }
+        
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: 700;
+            min-width: 2.5rem;
+            text-align: center;
+        }
+        
+        .leaderboard-info {
+            flex: 1;
+            margin-left: 1rem;
+        }
+        
+        .leaderboard-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+        
+        .leaderboard-details {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .leaderboard-score {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 4rem;
+            text-align: right;
+        }
+        
+        .leaderboard-empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        /* Cartoon Name Modal */
+        .name-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .name-modal-content {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6f0 100%);
+            border: 5px solid #ff6b9d;
+            border-radius: 2rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 
+                0 20px 60px rgba(255, 107, 157, 0.4),
+                0 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: modalBounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+        }
+        
+        @keyframes modalBounceIn {
+            0% {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        
+        .name-modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .name-modal-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ff6b9d;
+            margin: 0 0 1rem 0;
+            text-shadow: 
+                3px 3px 0px #ffffff,
+                4px 4px 0px #000000;
+            animation: wiggle 1s ease-in-out infinite;
+        }
+        
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+        
+        .name-modal-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+            border: 3px solid #ffaa00;
+        }
+        
+        .name-modal-score span {
+            font-size: 2rem;
+            color: #ff6b9d;
+        }
+        
+        .password-modal-warning {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
+            border: 3px solid #ff0000;
+            color: white;
+        }
+        
+        .name-modal-body {
+            margin-bottom: 2rem;
+        }
+        
+        .name-modal-body label {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1.25rem;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            font-weight: 600;
+            border: 4px solid #ff6b9d;
+            border-radius: 1.5rem;
+            background: white;
+            color: #2d3748;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(255, 107, 157, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .name-input:focus {
+            outline: none;
+            border-color: #c084fc;
+            box-shadow: 0 0 0 4px rgba(192, 132, 252, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .name-modal-footer {
+            display: flex;
+            gap: 1rem;
+            flex-direction: column;
+        }
+        
+        .modal-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.25rem;
+            border-radius: 1.5rem;
+            border: 4px solid;
+        }
+        
+        .modal-btn.btn-primary {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Success flash overlay */
+        .success-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(74, 222, 128, 0.4) 0%, transparent 70%);
+            z-index: 9998;
+            animation: flashEffect 0.6s ease-out forwards;
+            pointer-events: none;
+        }
+        
+        @keyframes flashEffect {
+            0% { opacity: 0; }
+            30% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+                <!-- Red Hat Branding - Centered -->
+                <div class="redhat-title" style="justify-content: center; width: 100%;">
+                    <span class="party-emoji">🎉</span>
+                    <img src="redhat.png" alt="Red Hat Logo" class="fedora-icon">
+                    <span class="redhat-text">Red Hat Family Day 2025</span>
+                    <span class="party-emoji party-emoji-2">🎊</span>
+                </div>
+                <div class="emoji-decorations">
+                    <span class="deco-emoji deco-1">😄</span>
+                    <span class="deco-emoji deco-2">🎈</span>
+                    <span class="deco-emoji deco-3">✨</span>
+                    <span class="deco-emoji deco-4">🎮</span>
+                    <span class="deco-emoji deco-5">🌟</span>
+                </div>
+                
+                <!-- Bottom Row: AI Vision Quest (left) and Dark Mode (right) -->
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <h1>
+                        <i class="fas fa-star"></i>
+                        AI Vision Quest!
+                        <i class="fas fa-trophy"></i>
+            </h1>
+            <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Score Board -->
+        <div class="score-board">
+            <div class="score-card">
+                <div class="score-icon">🏆</div>
+                <div class="score-value" id="totalScore">0</div>
+                <div class="score-label">Total Points</div>
+            </div>
+            <div class="score-card">
+                <div class="score-icon">⭐</div>
+                <div class="score-value" id="challengesCompleted">0</div>
+                <div class="score-label">Challenges Done</div>
+            </div>
+            <div class="score-card">
+                <div class="score-icon">🔥</div>
+                <div class="score-value" id="currentStreak">0</div>
+                <div class="score-label">Streak</div>
+            </div>
+            <div class="score-card">
+                <div class="score-icon">⏱️</div>
+                <div class="score-value timer-display" id="gameTimer">0:00</div>
+                <div class="score-label">Time Playing</div>
+            </div>
+        </div>
+
+        <div class="video-section">
+            <video id="videoFeed" autoplay playsinline></video>
+            <canvas id="canvas" class="hidden"></canvas>
+            <div id="statusIndicator" class="status-indicator status-ready">
+                <i class="fas fa-circle"></i>
+                <span>🎮 Ready to play!</span>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="control-group">
+                <label for="baseURL">
+                    <i class="fas fa-server"></i>
+                    API Endpoint
+                </label>
+                <div class="input-wrapper">
+                    <input type="text" id="baseURL" placeholder="Enter API endpoint or leave empty for OpenShift proxy (vLLM:8000)">
+                </div>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" class="preset-btn" onclick="setPresetEndpoint('http://localhost:8000')">vLLM:8000</button>
+                    <button type="button" class="preset-btn" onclick="setPresetEndpoint('http://localhost:11434')">Ollama:11434</button>
+                    <button type="button" class="preset-btn" onclick="setPresetEndpoint('http://localhost:8080')">llama.cpp:8080</button>
+                    <button type="button" class="preset-btn" onclick="setPresetEndpoint('')">OpenShift Proxy</button>
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                    💡 <strong>Production:</strong> Use "OpenShift Proxy" for cross-namespace vLLM service (port 8000)
+                </div>
+            </div>
+
+            <div class="control-group">
+                <button id="testConnectionBtn" class="btn btn-primary" onclick="testConnection()" style="width: 100%; margin-bottom: 0.5rem;">
+                    <i class="fas fa-wifi"></i>
+                    <span>Test Connection</span>
+                </button>
+                <button id="testVLLMBtn" class="btn btn-primary" onclick="testVLLMConnection()" style="width: 100%; margin-bottom: 1rem; background: linear-gradient(135deg, #c084fc, #818cf8);">
+                    <i class="fas fa-rocket"></i>
+                    <span>Test vLLM (Advanced)</span>
+                </button>
+            </div>
+
+            <div class="control-group" id="modelSelectionGroup">
+                <label for="modelSelect">
+                    <i class="fas fa-brain"></i>
+                    Model
+                </label>
+                <select id="modelSelect">
+                    <option value="Qwen/Qwen2-VL-2B-Instruct" selected>Qwen2-VL-2B-Instruct (vLLM)</option>
+                    <option value="Qwen/Qwen2.5-VL-7B-Instruct">Qwen2.5-VL-7B-Instruct (vLLM)</option>
+                    <option value="HuggingFaceTB/SmolVLM-500M-Instruct">SmolVLM-500M-Instruct (vLLM)</option>
+                    <option value="hf.co/ggml-org/SmolVLM-500M-Instruct-GGUF:Q8_0">SmolVLM-500M (Ollama)</option>
+                    <option value="llava">LLaVA (Ollama)</option>
+                    <option value="gpt-4-vision-preview">GPT-4 Vision (if available)</option>
+                    <option value="llava-v1.6-mistral-7b">LLaVA Mistral (llama.cpp)</option>
+                    <option value="llava-v1.5-7b">LLaVA 1.5 (llama.cpp)</option>
+                    <option value="auto">Auto-detect</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="intervalSelect">
+                    <i class="fas fa-clock"></i>
+                    Request Interval
+                </label>
+                <select id="intervalSelect">
+                    <option value="1000" selected>1 second</option>
+                    <option value="2000">2 seconds</option>
+                    <option value="3000">3 seconds</option>
+                    <option value="5000">5 seconds</option>
+                </select>
+                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                    💡 Qwen2-VL-2B has good instruction following and runs faster than larger models
+                </div>
+            </div>
+
+            <button id="startButton" class="btn btn-primary btn-bounce">
+                <i class="fas fa-play"></i>
+                <span>Start Game! 🎮</span>
+            </button>
+        </div>
+
+        <!-- Challenges Panel -->
+        <div class="challenges-section">
+            <h3>
+                <i class="fas fa-gamepad"></i>
+                Challenges
+            </h3>
+            <div id="challengesList">
+                <!-- Challenges will be populated by JavaScript -->
+            </div>
+            <button class="btn btn-primary" onclick="generateNewChallenges()" style="margin-top: auto;">
+                <i class="fas fa-shuffle"></i>
+                <span>New Challenges</span>
+            </button>
+        </div>
+
+        <div class="inputs-section">
+            <div class="input-card">
+                <h3>
+                    <i class="fas fa-bullseye"></i>
+                    Current Challenge
+                </h3>
+                <textarea id="instructionText" placeholder="Click a challenge or type your own quest!"></textarea>
+                
+                <button id="manualCompleteBtn" class="btn btn-primary" onclick="manualCompleteChallenge()" style="width: 100%; margin-top: 1rem; display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="manualBtnText">✅ Award Points</span>
+                </button>
+                
+                <div class="game-mode-selector" style="margin-top: 1rem;">
+                    <button class="mode-btn active" data-mode="scavenger">🔍 Scavenger</button>
+                    <button class="mode-btn" data-mode="emotions">😊 Emotions</button>
+                    <button class="mode-btn" data-mode="colors">🎨 Colors</button>
+                    <button class="mode-btn" data-mode="counting">🔢 Counting</button>
+                    <button class="mode-btn" data-mode="actions">🤸 Actions</button>
+                    <button class="mode-btn" data-mode="bodyparts">✋ Body Parts</button>
+                    <button class="mode-btn full-width" data-mode="yoga">🧘 Extreme Yoga</button>
+                </div>
+            </div>
+
+            <div class="input-card">
+                <h3>
+                    <i class="fas fa-robot"></i>
+                    AI's Answer
+                </h3>
+                <textarea id="responseText" readonly placeholder="The AI will help you complete challenges! Show objects to the camera and see what happens! 🎉"></textarea>
+            </div>
+        </div>
+        
+        <!-- Leaderboard Section -->
+        <div class="leaderboard-section">
+            <h3>
+                <i class="fas fa-trophy"></i>
+                Top Players 🏆
+            </h3>
+            <div id="leaderboardList" class="leaderboard-list">
+                <!-- Leaderboard will be populated by JavaScript -->
+            </div>
+            <button class="btn btn-danger" onclick="clearLeaderboard()" style="width: 100%; margin-top: auto; padding: 0.75rem;">
+                <i class="fas fa-trash"></i>
+                <span>Clear Leaderboard</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Cartoon Name Input Modal -->
+    <div id="nameModal" class="name-modal" style="display: none;">
+        <div class="name-modal-content">
+            <div class="name-modal-header">
+                <h2>🎉 AWESOME JOB! 🎉</h2>
+                <div class="name-modal-score">You scored <span id="modalScore">0</span> points!</div>
+            </div>
+            <div class="name-modal-body">
+                <label for="playerNameInput">Enter your name:</label>
+                <input type="text" id="playerNameInput" class="name-input" placeholder="Super Player" maxlength="20" />
+            </div>
+            <div class="name-modal-footer">
+                <button class="btn btn-primary modal-btn" onclick="submitName()">
+                    <i class="fas fa-trophy"></i>
+                    <span>Add to Leaderboard! 🏆</span>
+                </button>
+                <button class="btn btn-danger modal-btn" onclick="skipLeaderboard()">
+                    <span>Skip</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cartoon Password Modal -->
+    <div id="passwordModal" class="name-modal" style="display: none;">
+        <div class="name-modal-content">
+            <div class="name-modal-header">
+                <h2>🔒 ADMIN ACCESS 🔒</h2>
+                <div class="password-modal-warning">⚠️ Clear Leaderboard ⚠️</div>
+            </div>
+            <div class="name-modal-body">
+                <label for="adminPasswordInput">Enter admin password:</label>
+                <input type="password" id="adminPasswordInput" class="name-input" placeholder="••••••••" maxlength="50" />
+            </div>
+            <div class="name-modal-footer">
+                <button class="btn btn-danger modal-btn" onclick="submitPassword()" style="animation: pulse 2s infinite;">
+                    <i class="fas fa-trash"></i>
+                    <span>Clear Leaderboard</span>
+                </button>
+                <button class="btn btn-primary modal-btn" onclick="cancelPassword()">
+                    <span>Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Challenge Selection Prompt Modal -->
+    <div id="challengePromptModal" class="name-modal" style="display: none;">
+        <div class="name-modal-content">
+            <div class="name-modal-header">
+                <h2>⚠️ PICK A CHALLENGE! ⚠️</h2>
+                <div class="password-modal-warning" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
+                    🎯 Select a Challenge First
+                </div>
+            </div>
+            <div class="name-modal-body">
+                <label style="font-size: 1.1rem; line-height: 1.6;">
+                    Please click on one of the challenge cards on the right before starting the game!
+                    <br><br>
+                    👉 Look for the colorful cards
+                    <br>
+                    🎮 Pick one to play!
+                </label>
+            </div>
+            <div class="name-modal-footer">
+                <button class="btn btn-primary modal-btn" onclick="closeChallengePrompt()" style="animation: pulse 2s infinite;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Got It! 👍</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoFeed');
+        const canvas = document.getElementById('canvas');
+        const baseURL = document.getElementById('baseURL');
+        const instructionText = document.getElementById('instructionText');
+        const responseText = document.getElementById('responseText');
+        const modelSelect = document.getElementById('modelSelect');
+        const intervalSelect = document.getElementById('intervalSelect');
+        const startButton = document.getElementById('startButton');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Game state variables
+        let gameState = {
+            score: 0,
+            challengesCompleted: 0,
+            streak: 0,
+            startTime: null,
+            timerInterval: null,
+            currentChallenge: null,
+            currentMode: 'scavenger',
+            completedChallenges: new Set() // Track completed challenges
+        };
+        
+        // Challenge definitions by category
+        const challengeCategories = {
+            scavenger: [
+                { text: "Find something red!", points: 10, difficulty: "easy" },
+                { text: "Show me a book!", points: 15, difficulty: "easy" },
+                { text: "Find something round!", points: 10, difficulty: "easy" },
+                { text: "Show me a cup or mug!", points: 15, difficulty: "easy" },
+                { text: "Find something with buttons!", points: 20, difficulty: "medium" },
+                { text: "Show me a plant or flower!", points: 15, difficulty: "easy" },
+                { text: "Find something that writes!", points: 10, difficulty: "easy" },
+                { text: "Show me your favorite toy!", points: 20, difficulty: "medium" },
+                { text: "Find something blue!", points: 10, difficulty: "easy" },
+                { text: "Show me something soft and fluffy!", points: 25, difficulty: "medium" },
+                { text: "Find something made of paper!", points: 15, difficulty: "easy" },
+                { text: "Show me a chair or seat!", points: 10, difficulty: "easy" },
+                { text: "Find something shiny!", points: 20, difficulty: "medium" },
+                { text: "Show me something from the kitchen!", points: 20, difficulty: "medium" },
+                { text: "Find something with wheels!", points: 25, difficulty: "medium" },
+                { text: "Show me eyeglasses or sunglasses!", points: 20, difficulty: "medium" },
+                { text: "Find something rectangular!", points: 15, difficulty: "easy" },
+                { text: "Show me a phone or tablet!", points: 15, difficulty: "easy" },
+            ],
+            emotions: [
+                { text: "Show me a happy face! 😊", points: 15, difficulty: "easy" },
+                { text: "Make a surprised face! 😮", points: 20, difficulty: "medium" },
+                { text: "Show me a silly face! 🤪", points: 20, difficulty: "medium" },
+                { text: "Can you look excited?", points: 15, difficulty: "easy" },
+                { text: "Show me a thinking face! 🤔", points: 20, difficulty: "medium" },
+                { text: "Make a sleepy face! 😴", points: 15, difficulty: "easy" },
+                { text: "Show me an angry face! 😠", points: 20, difficulty: "medium" },
+                { text: "Can you look confused?", points: 20, difficulty: "medium" },
+                { text: "Make a laughing face! 😄", points: 15, difficulty: "easy" },
+                { text: "Show me a cool face! 😎", points: 20, difficulty: "medium" },
+                { text: "Can you look scared?", points: 25, difficulty: "hard" },
+                { text: "Make a kissy face! 😘", points: 20, difficulty: "medium" },
+            ],
+            colors: [
+                { text: "What colors do you see in this image?", points: 15, difficulty: "easy" },
+                { text: "Show me something red!", points: 10, difficulty: "easy" },
+                { text: "Show me something blue!", points: 10, difficulty: "easy" },
+                { text: "Show me something yellow!", points: 10, difficulty: "easy" },
+                { text: "Find something green!", points: 10, difficulty: "easy" },
+                { text: "Show me 3 different colored objects!", points: 30, difficulty: "hard" },
+                { text: "Find something orange!", points: 10, difficulty: "easy" },
+                { text: "Show me something purple!", points: 10, difficulty: "easy" },
+                { text: "Find something pink!", points: 10, difficulty: "easy" },
+                { text: "Show me something white!", points: 10, difficulty: "easy" },
+                { text: "Find something black!", points: 10, difficulty: "easy" },
+                { text: "Show me the brightest thing you can find!", points: 20, difficulty: "medium" },
+            ],
+            counting: [
+                { text: "How many fingers am I holding up?", points: 15, difficulty: "easy" },
+                { text: "Show me 1 object!", points: 10, difficulty: "easy" },
+                { text: "Show me 2 of the same thing!", points: 20, difficulty: "medium" },
+                { text: "Show me 3 different things!", points: 25, difficulty: "medium" },
+                { text: "Count the objects you can see!", points: 20, difficulty: "medium" },
+                { text: "Show me 4 things!", points: 30, difficulty: "hard" },
+                { text: "How many hands do you have?", points: 15, difficulty: "easy" },
+                { text: "Show me 5 fingers!", points: 15, difficulty: "easy" },
+                { text: "Find a pair of something!", points: 20, difficulty: "medium" },
+                { text: "Show me more than 3 objects!", points: 25, difficulty: "medium" },
+            ],
+            actions: [
+                { text: "Wave hello to the camera!", points: 15, difficulty: "easy" },
+                { text: "Give a thumbs up! 👍", points: 10, difficulty: "easy" },
+                { text: "Clap your hands!", points: 15, difficulty: "easy" },
+                { text: "Jump up and down!", points: 20, difficulty: "medium" },
+                { text: "Do a silly dance!", points: 25, difficulty: "medium" },
+                { text: "Touch your nose!", points: 15, difficulty: "easy" },
+                { text: "Make a peace sign! ✌️", points: 15, difficulty: "easy" },
+                { text: "Point at the camera!", points: 10, difficulty: "easy" },
+                { text: "Spin around in a circle!", points: 20, difficulty: "medium" },
+                { text: "Stand on one foot!", points: 20, difficulty: "medium" },
+                { text: "Touch your toes!", points: 20, difficulty: "medium" },
+                { text: "Make a heart with your hands! ❤️", points: 25, difficulty: "medium" },
+            ],
+            bodyparts: [
+                { text: "Show me your hands!", points: 10, difficulty: "easy" },
+                { text: "Point to your eyes!", points: 10, difficulty: "easy" },
+                { text: "Show me your feet!", points: 15, difficulty: "easy" },
+                { text: "Touch your ears!", points: 15, difficulty: "easy" },
+                { text: "Show me your hair!", points: 10, difficulty: "easy" },
+                { text: "How many fingers can you wiggle?", points: 20, difficulty: "medium" },
+                { text: "Show me your elbow!", points: 15, difficulty: "easy" },
+                { text: "Point to your mouth!", points: 10, difficulty: "easy" },
+                { text: "Show me your knees!", points: 15, difficulty: "easy" },
+                { text: "Make bunny ears with your hands!", points: 20, difficulty: "medium" },
+                { text: "Show me both your hands!", points: 15, difficulty: "easy" },
+                { text: "Wiggle your fingers!", points: 20, difficulty: "medium" },
+            ],
+            yoga: [
+                { text: "Stand like a tree! 🌳 (one foot up, arms high)", points: 25, difficulty: "medium" },
+                { text: "Make a star pose! ⭐ (arms and legs wide)", points: 20, difficulty: "easy" },
+                { text: "Do warrior pose! ⚔️ (lunge with arms out)", points: 30, difficulty: "hard" },
+                { text: "Touch your toes! (fold forward)", points: 20, difficulty: "medium" },
+                { text: "Airplane pose! ✈️ (balance on one leg, arms out)", points: 30, difficulty: "hard" },
+                { text: "Cobra pose! 🐍 (lie down, lift chest)", points: 25, difficulty: "medium" },
+                { text: "Mountain pose! ⛰️ (stand tall, arms up)", points: 15, difficulty: "easy" },
+                { text: "Flamingo pose! 🦩 (stand on one leg)", points: 25, difficulty: "medium" },
+                { text: "Chair pose! 💺 (squat with arms up)", points: 30, difficulty: "hard" },
+                { text: "Butterfly pose! 🦋 (sit, feet together)", points: 20, difficulty: "medium" },
+                { text: "Downward dog! 🐕 (make a triangle shape)", points: 30, difficulty: "hard" },
+                { text: "Reach for the sky! 🌤️ (stretch arms up high)", points: 15, difficulty: "easy" },
+                { text: "Make a bridge! 🌉 (lie down, lift hips)", points: 35, difficulty: "hard" },
+                { text: "Superhero pose! 🦸 (stand strong, hands on hips)", points: 15, difficulty: "easy" },
+                { text: "Happy baby! 👶 (on back, hold feet)", points: 25, difficulty: "medium" },
+            ]
+        };
+
+        // Set default values
+        instructionText.value = "Click 'Start' and show me cool things! 🎮";
+        
+        // Leaderboard Functions
+        function loadLeaderboard() {
+            const leaderboard = JSON.parse(localStorage.getItem('aiVisionQuestLeaderboard') || '[]');
+            return leaderboard;
+        }
+        
+        function saveLeaderboard(leaderboard) {
+            localStorage.setItem('aiVisionQuestLeaderboard', JSON.stringify(leaderboard));
+        }
+        
+        function displayLeaderboard() {
+            const leaderboard = loadLeaderboard();
+            const leaderboardList = document.getElementById('leaderboardList');
+            
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<div class="leaderboard-empty">No scores yet! Be the first to play! 🎮</div>';
+                return;
+            }
+            
+            // Sort by score (highest first)
+            leaderboard.sort((a, b) => b.score - a.score);
+            
+            // Display top 10
+            leaderboardList.innerHTML = leaderboard.slice(0, 10).map((entry, index) => {
+                const rank = index + 1;
+                const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `${rank}.`;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                
+                return `
+                    <div class="leaderboard-item ${rankClass}">
+                        <div class="leaderboard-rank">${medal}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${entry.name}</div>
+                            <div class="leaderboard-details">
+                                ${entry.challenges} challenges • ${entry.streak} streak • ${entry.time}
+                            </div>
+                        </div>
+                        <div class="leaderboard-score">${entry.score}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function addToLeaderboard(name, score, challenges, streak, time) {
+            const leaderboard = loadLeaderboard();
+            const entry = {
+                name: name,
+                score: score,
+                challenges: challenges,
+                streak: streak,
+                time: time,
+                date: new Date().toLocaleDateString()
+            };
+            
+            leaderboard.push(entry);
+            saveLeaderboard(leaderboard);
+            displayLeaderboard();
+        }
+        
+        function clearLeaderboard() {
+            // Show password modal instead of prompt
+            showPasswordModal();
+        }
+        
+        function showPasswordModal() {
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('passwordModal').style.display = 'flex';
+            document.getElementById('adminPasswordInput').focus();
+        }
+        
+        function hidePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+        
+        function submitPassword() {
+            const password = document.getElementById('adminPasswordInput').value;
+            
+            // Check password (default: "redhat2025")
+            if (password === '2025') {
+                hidePasswordModal();
+                
+                // Second confirmation
+                setTimeout(() => {
+                    if (confirm('⚠️ Are you ABSOLUTELY sure you want to clear the leaderboard?\n\nThis will DELETE all scores and CANNOT be undone!')) {
+                        localStorage.removeItem('aiVisionQuestLeaderboard');
+                        displayLeaderboard();
+                        showCelebration('🗑️');
+                        
+                        // Show success message
+                        responseText.value = '✅ Leaderboard cleared successfully!\n\nAll scores have been deleted.';
+                    }
+                }, 100);
+            } else {
+                alert('❌ Incorrect password! Leaderboard not cleared.');
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('adminPasswordInput').focus();
+            }
+        }
+        
+        function cancelPassword() {
+            hidePasswordModal();
+        }
+        
+        // Challenge Prompt Modal Functions
+        function showChallengePrompt() {
+            document.getElementById('challengePromptModal').style.display = 'flex';
+        }
+        
+        function closeChallengePrompt() {
+            document.getElementById('challengePromptModal').style.display = 'none';
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Cartoon Modal Functions
+        let pendingLeaderboardData = null;
+        
+        function showNameModal(score, challenges, streak, time) {
+            pendingLeaderboardData = { score, challenges, streak, time };
+            document.getElementById('modalScore').textContent = score;
+            document.getElementById('playerNameInput').value = '';
+            const modal = document.getElementById('nameModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+            setTimeout(() => {
+                const input = document.getElementById('playerNameInput');
+                if (input) {
+                    input.focus();
+                }
+            }, 100);
+        }
+        
+        function hideNameModal() {
+            const modal = document.getElementById('nameModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            pendingLeaderboardData = null;
+        }
+        
+        function submitName() {
+            const playerName = document.getElementById('playerNameInput').value.trim();
+            
+            if (!playerName) {
+                alert('Please enter a name!');
+                return;
+            }
+            
+            if (pendingLeaderboardData) {
+                addToLeaderboard(
+                    playerName,
+                    pendingLeaderboardData.score,
+                    pendingLeaderboardData.challenges,
+                    pendingLeaderboardData.streak,
+                    pendingLeaderboardData.time
+                );
+                
+                showCelebration('🏆');
+                createConfetti();
+                
+                responseText.value = `🏆 ${playerName} added to leaderboard!\n\n🎮 Final Score: ${pendingLeaderboardData.score} points\n⭐ Challenges: ${pendingLeaderboardData.challenges}\n🔥 Streak: ${pendingLeaderboardData.streak}\n⏱️ Time: ${pendingLeaderboardData.time}\n\nCheck the leaderboard! 👉`;
+            }
+            
+            // Clear pending data
+            pendingLeaderboardData = null;
+            hideNameModal();
+        }
+        
+        function skipLeaderboard() {
+            if (pendingLeaderboardData) {
+                responseText.value = `🎮 Game Stopped!\n\n🏆 Total Score: ${pendingLeaderboardData.score}\n⭐ Challenges Completed: ${pendingLeaderboardData.challenges}\n🔥 Best Streak: ${pendingLeaderboardData.streak}\n⏱️ Time: ${pendingLeaderboardData.time}\n\nGreat job! Click Start to play again! 🎉`;
+            }
+            // Clear pending data
+            pendingLeaderboardData = null;
+            hideNameModal();
+        }
+        
+        // Handle Enter key in name and password inputs
+        document.addEventListener('DOMContentLoaded', () => {
+            const nameInput = document.getElementById('playerNameInput');
+            if (nameInput) {
+                nameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        submitName();
+                    }
+                });
+            }
+            
+            const passwordInput = document.getElementById('adminPasswordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        submitPassword();
+                    }
+                });
+            }
+        });
+        
+        // Gaming Functions
+        function getChallengeIcon(challengeText, mode) {
+            // Extract emoji if it exists in the challenge text
+            const emojiMatch = challengeText.match(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u);
+            if (emojiMatch) {
+                return emojiMatch[0];
+            }
+            
+            // Mode-specific icons based on keywords
+            const text = challengeText.toLowerCase();
+            
+            if (mode === 'yoga') {
+                if (text.includes('tree')) return '🌳';
+                if (text.includes('star')) return '⭐';
+                if (text.includes('warrior')) return '⚔️';
+                if (text.includes('airplane')) return '✈️';
+                if (text.includes('cobra')) return '🐍';
+                if (text.includes('mountain')) return '⛰️';
+                if (text.includes('flamingo')) return '🦩';
+                if (text.includes('chair')) return '💺';
+                if (text.includes('butterfly')) return '🦋';
+                if (text.includes('dog')) return '🐕';
+                if (text.includes('sky')) return '🌤️';
+                if (text.includes('bridge')) return '🌉';
+                if (text.includes('superhero')) return '🦸';
+                if (text.includes('baby')) return '👶';
+                return '🧘';
+            }
+            
+            if (mode === 'scavenger') {
+                if (text.includes('red')) return '🔴';
+                if (text.includes('book')) return '📚';
+                if (text.includes('round')) return '⚪';
+                if (text.includes('cup') || text.includes('mug')) return '☕';
+                if (text.includes('button')) return '🔘';
+                if (text.includes('plant') || text.includes('flower')) return '🌸';
+                if (text.includes('write')) return '✏️';
+                if (text.includes('toy')) return '🧸';
+                if (text.includes('blue')) return '🔵';
+                if (text.includes('soft') || text.includes('fluffy')) return '🧸';
+                if (text.includes('paper')) return '📄';
+                if (text.includes('chair') || text.includes('seat')) return '🪑';
+                if (text.includes('shiny')) return '✨';
+                if (text.includes('kitchen')) return '🍴';
+                if (text.includes('wheel')) return '🚗';
+                if (text.includes('glasses')) return '👓';
+                if (text.includes('rectangular')) return '📱';
+                if (text.includes('phone') || text.includes('tablet')) return '📱';
+                return '🔍';
+            }
+            
+            if (mode === 'colors') {
+                if (text.includes('red')) return '🔴';
+                if (text.includes('blue')) return '🔵';
+                if (text.includes('yellow')) return '🟡';
+                if (text.includes('green')) return '🟢';
+                if (text.includes('orange')) return '🟠';
+                if (text.includes('purple')) return '🟣';
+                if (text.includes('pink')) return '💗';
+                if (text.includes('white')) return '⚪';
+                if (text.includes('black')) return '⚫';
+                if (text.includes('bright')) return '💡';
+                return '🎨';
+            }
+            
+            if (mode === 'counting') {
+                if (text.includes('finger')) return '🖐️';
+                if (text.includes('hand')) return '✋';
+                return '🔢';
+            }
+            
+            if (mode === 'actions') {
+                if (text.includes('wave')) return '👋';
+                if (text.includes('thumbs')) return '👍';
+                if (text.includes('clap')) return '👏';
+                if (text.includes('jump')) return '🦘';
+                if (text.includes('dance')) return '💃';
+                if (text.includes('nose')) return '👃';
+                if (text.includes('peace')) return '✌️';
+                if (text.includes('point')) return '👉';
+                if (text.includes('spin')) return '🌀';
+                if (text.includes('foot')) return '🦶';
+                if (text.includes('toe')) return '🦶';
+                if (text.includes('heart')) return '❤️';
+                return '🤸';
+            }
+            
+            if (mode === 'bodyparts') {
+                if (text.includes('hand')) return '✋';
+                if (text.includes('eye')) return '👁️';
+                if (text.includes('feet') || text.includes('foot')) return '🦶';
+                if (text.includes('ear')) return '👂';
+                if (text.includes('hair')) return '💇';
+                if (text.includes('finger')) return '👆';
+                if (text.includes('elbow')) return '💪';
+                if (text.includes('mouth')) return '👄';
+                if (text.includes('knee')) return '🦵';
+                if (text.includes('bunny')) return '🐰';
+                return '✋';
+            }
+            
+            // Default icons per mode
+            const modeIcons = {
+                'scavenger': '🔍',
+                'emotions': '😊',
+                'colors': '🎨',
+                'counting': '🔢',
+                'actions': '🤸',
+                'bodyparts': '✋',
+                'yoga': '🧘'
+            };
+            
+            return modeIcons[mode] || '⭐';
+        }
+        
+        function generateNewChallenges() {
+            const challengesList = document.getElementById('challengesList');
+            const mode = gameState.currentMode;
+            const challenges = challengeCategories[mode];
+            
+            // Clear completed challenges when generating new set
+            gameState.completedChallenges.clear();
+            
+            // Shuffle and select random challenges
+            const shuffled = [...challenges].sort(() => Math.random() - 0.5);
+            const selected = shuffled.slice(0, 5);
+            
+            challengesList.innerHTML = '';
+            selected.forEach((challenge, index) => {
+                // Create unique ID for this challenge instance
+                const challengeId = `${mode}_${index}_${Date.now()}`;
+                challenge.id = challengeId;
+                
+                const icon = getChallengeIcon(challenge.text, mode);
+                
+                const card = document.createElement('div');
+                card.className = 'challenge-card';
+                card.dataset.challengeId = challengeId;
+                card.innerHTML = `
+                    <div class="challenge-icon">${icon}</div>
+                    <div class="challenge-content">
+                        <div class="challenge-title">
+                            <span>${challenge.text}</span>
+                            <span class="challenge-points">+${challenge.points}</span>
+                        </div>
+                        <div style="margin-top: 0.5rem;">
+                            <span class="difficulty-badge difficulty-${challenge.difficulty}">${challenge.difficulty}</span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => selectChallenge(challenge, card);
+                challengesList.appendChild(card);
+            });
+        }
+        
+        function selectChallenge(challenge, cardElement) {
+            // Check if challenge is already completed
+            if (gameState.completedChallenges.has(challenge.id)) {
+                alert('⭐ You already completed this challenge! Pick a new one! 🎮');
+                return;
+            }
+            
+            // Remove active class from all cards
+            document.querySelectorAll('.challenge-card').forEach(c => c.classList.remove('active'));
+            // Add active class to selected card
+            cardElement.classList.add('active');
+            
+            // Set the challenge based on game mode
+            const cleanChallenge = challenge.text.replace('!', '').replace('?', '');
+            const mode = gameState.currentMode;
+            const challengeLower = cleanChallenge.toLowerCase();
+            
+            let prompt = '';
+            
+            if (mode === 'colors') {
+                // Check if it's asking for specific color (YES/NO) or describing (open-ended)
+                if (challengeLower.includes('what colors')) {
+                    prompt = `Look at this image and describe what you see. List all the colors you can see in the image. Be specific and descriptive about the colors present.`;
+                } else {
+                    // Extract the specific color from the challenge
+                    let specificColor = '';
+                    const colors = ['red', 'blue', 'yellow', 'green', 'orange', 'purple', 'pink', 'white', 'black', 'bright'];
+                    for (const color of colors) {
+                        if (challengeLower.includes(color)) {
+                            specificColor = color;
+                            break;
+                        }
+                    }
+                    
+                    prompt = `Look at this image! Do you see any ${specificColor ? specificColor : 'this color'} color? \n\nIMPORTANT: If you see ${specificColor ? specificColor : 'the color'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                }
+            } else if (mode === 'counting') {
+                // Check if it's asking to count (open-ended) or show specific number (YES/NO)
+                if (challengeLower.includes('how many') || challengeLower.includes('count')) {
+                    prompt = `Look at this image. Count what you see and tell me the number. The challenge is: "${cleanChallenge}". Be specific about the quantity you see.`;
+                } else {
+                    // Extract the number from the challenge
+                    let extractedNumber = '';
+                    const numberMatch = cleanChallenge.match(/\b(1|one|2|two|3|three|4|four|5|five|pair)\b/i);
+                    if (numberMatch) {
+                        extractedNumber = numberMatch[0];
+                    }
+                    
+                    prompt = `Look at this image! Can you see ${extractedNumber ? extractedNumber : 'that many'} things?\n\nIMPORTANT: If you see ${extractedNumber ? extractedNumber : 'that many'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                }
+            } else if (mode === 'bodyparts') {
+                // For body parts, make sure it's the correct part
+                if (challengeLower.includes('how many') || challengeLower.includes('count')) {
+                    prompt = `Look at this image. Count what you see and tell me the number. The challenge is: "${cleanChallenge}". Be specific about the quantity you see.`;
+                } else {
+                    // Extract the specific body part from the challenge
+                    let specificPart = '';
+                    const bodyParts = ['hands', 'hand', 'eyes', 'eye', 'feet', 'foot', 'ears', 'ear', 'hair', 'fingers', 'finger', 'elbow', 'mouth', 'knees', 'knee', 'nose', 'toes'];
+                    for (const part of bodyParts) {
+                        if (challengeLower.includes(part)) {
+                            specificPart = part;
+                            break;
+                        }
+                    }
+                    
+                    prompt = `Look at this image! Can you see ${specificPart ? specificPart : 'this body part'}?\n\nIMPORTANT: If you see ${specificPart ? specificPart : 'it'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+                }
+            } else if (mode === 'emotions') {
+                // For emotions, look for clear expressions
+                // Extract the specific emotion from the challenge
+                let specificEmotion = '';
+                const emotions = ['happy', 'surprised', 'silly', 'excited', 'thinking', 'sleepy', 'angry', 'confused', 'laughing', 'cool', 'scared'];
+                for (const emotion of emotions) {
+                    if (challengeLower.includes(emotion)) {
+                        specificEmotion = emotion;
+                        break;
+                    }
+                }
+                
+                prompt = `Look at this image! Can you see a ${specificEmotion ? specificEmotion : 'this'} face or expression?\n\nIMPORTANT: If you see a ${specificEmotion ? specificEmotion : 'this'} expression, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+            } else if (mode === 'yoga') {
+                // For extreme yoga poses - check if they're doing the pose
+                // Extract the specific yoga pose from the challenge
+                let specificPose = '';
+                const poses = ['tree', 'star', 'warrior', 'airplane', 'cobra', 'mountain', 'flamingo', 'chair', 'butterfly', 'dog', 'downward', 'bridge', 'superhero', 'baby'];
+                for (const pose of poses) {
+                    if (challengeLower.includes(pose)) {
+                        specificPose = pose;
+                        break;
+                    }
+                }
+                
+                prompt = `Look at this image! Is someone doing ${specificPose ? specificPose + ' pose' : 'this pose'}?\n\nIMPORTANT: If someone is doing ${specificPose ? specificPose + ' pose' : 'the pose'}, you MUST start with YES. If not, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+            } else {
+                // For scavenger and actions - use YES/NO format
+                // Try to extract key items/actions from the challenge
+                let keyItem = '';
+                
+                // Common scavenger items
+                if (challengeLower.includes('book')) keyItem = 'a BOOK';
+                else if (challengeLower.includes('cup') || challengeLower.includes('mug')) keyItem = 'a CUP or MUG';
+                else if (challengeLower.includes('plant') || challengeLower.includes('flower')) keyItem = 'a PLANT or FLOWER';
+                else if (challengeLower.includes('toy')) keyItem = 'a TOY';
+                else if (challengeLower.includes('phone') || challengeLower.includes('tablet')) keyItem = 'a PHONE or TABLET';
+                else if (challengeLower.includes('glasses')) keyItem = 'GLASSES';
+                
+                // Common actions
+                else if (challengeLower.includes('wave')) keyItem = 'someone WAVING';
+                else if (challengeLower.includes('thumbs')) keyItem = 'a THUMBS UP';
+                else if (challengeLower.includes('clap')) keyItem = 'someone CLAPPING';
+                else if (challengeLower.includes('jump')) keyItem = 'someone JUMPING';
+                else if (challengeLower.includes('dance')) keyItem = 'someone DANCING';
+                else if (challengeLower.includes('peace')) keyItem = 'a PEACE SIGN';
+                else if (challengeLower.includes('heart')) keyItem = 'a HEART shape made with hands';
+                
+                prompt = `Look at this image! Can you see ${keyItem || 'this'}?\n\nIMPORTANT: If you see ${keyItem || 'it'}, you MUST start with YES. If you don't see it, start with NO.\n\nFormat: YES - [reason] or NO - [reason]`;
+            }
+            
+            instructionText.value = prompt;
+            gameState.currentChallenge = challenge;
+            console.log('🎯 Challenge selected:', challenge.text);
+            console.log('📝 Prompt created:', prompt);
+            
+            // Show manual complete button and update styling
+            const manualBtn = document.getElementById('manualCompleteBtn');
+            const manualBtnText = document.getElementById('manualBtnText');
+            manualBtn.style.display = 'flex';
+            
+            // Update response based on challenge type
+            const isOpenEnded = 
+                cleanChallenge.toLowerCase().includes('what colors') ||
+                cleanChallenge.toLowerCase().includes('how many') ||
+                cleanChallenge.toLowerCase().includes('count');
+            
+            if (isOpenEnded) {
+                // For open-ended, make button more prominent
+                manualBtn.style.animation = 'pulse 2s infinite';
+                manualBtnText.textContent = '✅ Click Here to Award Points!';
+                responseText.value = `🎯 Challenge Active: ${challenge.text}\n\nShow the camera when you're ready!\n\n📝 This is an open-ended challenge - the AI will describe what it sees.\nIf the answer is correct, click the green ✅ button below to award ${challenge.points} points! 🏆`;
+            } else {
+                // For auto-scoring challenges, button is backup option
+                manualBtn.style.animation = '';
+                manualBtnText.textContent = '✅ Award Points (Manual)';
+                responseText.value = `🎯 Challenge Active: ${challenge.text}\n\nShow the camera when you're ready!\n\n✅ Auto-scoring: ${challenge.points} points if AI says YES!\n(Or use the manual button if needed)`;
+            }
+            
+            // Play a fun sound effect
+            playSuccessSound();
+        }
+        
+        function manualCompleteChallenge() {
+            if (gameState.currentChallenge) {
+                const points = gameState.currentChallenge.points;
+                updateScore(points);
+                
+                responseText.value = `✅ MANUAL POINTS AWARDED!\n\n🎉 AWESOME! You earned ${points} points!\n\nPick another challenge to continue!`;
+                
+                // Clear the active challenge
+                document.querySelectorAll('.challenge-card').forEach(c => c.classList.remove('active'));
+                gameState.currentChallenge = null;
+                
+                // Hide and reset manual button
+                const manualBtn = document.getElementById('manualCompleteBtn');
+                manualBtn.style.display = 'none';
+                manualBtn.style.animation = '';
+                
+                updateStatus('ready', '🎉 Challenge complete! Pick another!', 'star');
+            }
+        }
+        
+        function updateScore(points) {
+            // Mark current challenge as completed
+            if (gameState.currentChallenge && gameState.currentChallenge.id) {
+                gameState.completedChallenges.add(gameState.currentChallenge.id);
+                
+                // Mark the challenge card as completed
+                const challengeCard = document.querySelector(`[data-challenge-id="${gameState.currentChallenge.id}"]`);
+                if (challengeCard) {
+                    challengeCard.classList.add('completed');
+                    challengeCard.classList.remove('active');
+                    // Add checkmark to completed challenge (after the icon)
+                    const contentDiv = challengeCard.querySelector('.challenge-content');
+                    if (contentDiv && !contentDiv.querySelector('.completed-badge')) {
+                        const checkmark = document.createElement('span');
+                        checkmark.className = 'completed-badge';
+                        checkmark.innerHTML = '✅';
+                        checkmark.style.marginRight = '0.5rem';
+                        contentDiv.insertBefore(checkmark, contentDiv.firstChild);
+                    }
+                }
+            }
+            
+            gameState.score += points;
+            gameState.challengesCompleted++;
+            gameState.streak++;
+            
+            document.getElementById('totalScore').textContent = gameState.score;
+            document.getElementById('challengesCompleted').textContent = gameState.challengesCompleted;
+            document.getElementById('currentStreak').textContent = gameState.streak;
+            
+            // Create flash overlay effect
+            const flash = document.createElement('div');
+            flash.className = 'success-flash';
+            document.body.appendChild(flash);
+            setTimeout(() => {
+                if (document.body.contains(flash)) {
+                    document.body.removeChild(flash);
+                }
+            }, 600);
+            
+            // Trigger celebration
+            showCelebration('🎉');
+            createConfetti();
+            playSuccessSound();
+        }
+        
+        function showCelebration(emoji) {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.textContent = emoji;
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                if (document.body.contains(celebration)) {
+                    document.body.removeChild(celebration);
+                }
+            }, 1500);
+        }
+        
+        function createConfetti() {
+            const colors = ['#ff6b9d', '#c084fc', '#60a5fa', '#fcd34d', '#4ade80', '#f97316', '#ec4899'];
+            const confettiCount = 100; // Double the confetti!
+            
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    
+                    // Start from random horizontal position
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '-20px'; // Start from top
+                    
+                    // Random color
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Varied animation speed
+                    confetti.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+                    
+                    // Random size variation
+                    const size = 10 + Math.random() * 10;
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size + 'px';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        if (document.body.contains(confetti)) {
+                            document.body.removeChild(confetti);
+                        }
+                    }, 4000);
+                }, i * 20);
+            }
+        }
+        
+        function playSuccessSound() {
+            // Create a simple beep using Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                // Audio not supported, that's okay
+            }
+        }
+        
+        function startGameTimer() {
+            gameState.startTime = Date.now();
+            gameState.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('gameTimer').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        function stopGameTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+                gameState.timerInterval = null;
+            }
+        }
+        
+        // Game mode switching
+        document.addEventListener('DOMContentLoaded', () => {
+            const modeButtons = document.querySelectorAll('.mode-btn');
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active from all
+                    modeButtons.forEach(b => b.classList.remove('active'));
+                    // Add active to clicked
+                    btn.classList.add('active');
+                    // Update mode
+                    gameState.currentMode = btn.dataset.mode;
+                    // Clear completed challenges when switching modes
+                    gameState.completedChallenges.clear();
+                    // Generate new challenges
+                    generateNewChallenges();
+                });
+            });
+            
+            // Initialize with default challenges
+            generateNewChallenges();
+        });
+        
+        // Smart API endpoint detection for Production (vLLM on OpenShift)
+        function getDefaultAPIEndpoint() {
+            const hostname = window.location.hostname;
+            const protocol = window.location.protocol;
+            
+            // Default to vLLM for local testing
+            if (protocol === 'file:') {
+                return "http://localhost:8000";
+            }
+            
+            // If running on localhost, default to vLLM
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return "http://localhost:8000";
+            }
+            
+            // If running on OpenShift or similar platform, use relative path to API
+            // This allows nginx/service mesh to proxy to the vLLM service (port 8000)
+            if (hostname.includes('apps') || hostname.includes('openshift') || 
+                hostname.includes('cluster') || hostname.includes('svc')) {
+                return ""; // Use relative path - proxy will route /v1/ to vLLM service
+            }
+            
+            // Default to proxy mode for production
+            return "";
+        }
+        
+        baseURL.value = getDefaultAPIEndpoint();
+
+        let stream;
+        let intervalId;
+        let isProcessing = false;
+
+        // Preset endpoint function
+        function setPresetEndpoint(url) {
+            baseURL.value = url;
+            baseURL.focus();
+            
+            // Update model selection visibility based on endpoint
+            updateModelSelectionVisibility(url);
+            
+            // Update status message based on whether endpoint is set
+            if (stream) {
+                if (url.trim()) {
+                    updateStatus('ready', 'Camera ready - Click start to begin', 'check-circle');
+                    responseText.value = "Camera access granted. Ready to start processing.";
+                } else {
+                    updateStatus('ready', 'Camera ready - Using proxy endpoint', 'check-circle');
+                    responseText.value = "Camera access granted. Using proxy endpoint for API calls. Ready to start processing.";
+                }
+            }
+        }
+
+        // Update model selection visibility based on endpoint
+        function updateModelSelectionVisibility(url) {
+            const modelGroup = document.getElementById('modelSelectionGroup');
+            
+            if (url.includes('11434') || url.includes('ollama')) {
+                // Ollama endpoint - show model selection
+                modelGroup.style.display = 'flex';
+            } else if (url.includes('8080') || url.includes('llama.cpp') || 
+                       url.includes('8000') || url.includes('vllm') || url === '') {
+                // vLLM, llama.cpp endpoint or empty (proxy) - hide model selection
+                // vLLM typically serves a single model
+                modelGroup.style.display = 'none';
+            } else {
+                // Unknown endpoint - show model selection by default
+                modelGroup.style.display = 'flex';
+            }
+        }
+
+        // Test connection function
+        async function testConnection() {
+            // Allow empty endpoint for OpenShift proxy setup
+            const endpoint = baseURL.value.trim();
+            if (!endpoint) {
+                // For empty endpoint, test the proxy path
+                console.log('Testing proxy connection (empty endpoint)');
+            }
+
+            updateStatus('processing', 'Testing connection...', 'wifi');
+            responseText.value = "Testing connection to API endpoint...";
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for test
+
+                console.log('Testing connection to:', baseURL.value || 'proxy endpoint');
+                
+                // Test the actual API endpoint with a simple request
+                const testPayload = {
+                    model: modelSelect.value,
+                    max_tokens: 10,
+                    messages: [
+                        { role: 'user', content: 'Hello' }
+                    ]
+                };
+
+                // Build API URL - use relative path if baseURL is empty (for proxy)
+                const apiUrl = baseURL.value.trim() ? `${baseURL.value}/v1/chat/completions` : '/v1/chat/completions';
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    mode: 'cors',
+                    signal: controller.signal,
+                    body: JSON.stringify(testPayload)
+                });
+
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus('ready', 'API connection successful', 'check-circle');
+                    const serverInfo = baseURL.value.trim() || 'proxy endpoint';
+                    responseText.value = `✅ API connection successful!\nServer: ${serverInfo}\nModel: ${modelSelect.value}\nResponse: ${data.choices?.[0]?.message?.content || 'API responded correctly'}`;
+                } else {
+                    const errorText = await response.text();
+                    updateStatus('ready', 'Server reachable but API error', 'exclamation-triangle');
+                    const serverInfo = baseURL.value.trim() || 'proxy endpoint';
+                    responseText.value = `⚠️ Server reachable but API returned error: ${response.status}\nEndpoint: ${serverInfo}\nError: ${errorText}`;
+                }
+            } catch (error) {
+                console.error('Connection test error:', error);
+                updateStatus('error', 'Connection failed', 'exclamation-triangle');
+                
+                const serverInfo = baseURL.value.trim() || 'proxy endpoint';
+                if (error.name === 'AbortError') {
+                    responseText.value = `❌ Connection test timed out after 10 seconds.\nEndpoint: ${serverInfo}\n\nPlease check:\n1. Is the server running?\n2. Is the URL correct?\n3. Are you experiencing network issues?`;
+                } else if (error.message.includes('Failed to fetch') || error.message.includes('CORS')) {
+                    responseText.value = `❌ CORS or connection error.\nEndpoint: ${serverInfo}\n\nFor vLLM/OpenShift deployment:\n1. Ensure the route/service is correctly configured\n2. Check that the vLLM service is running on port 8000\n3. Verify cross-namespace networking is enabled\n4. Try using "OpenShift Proxy" mode (empty endpoint)\n\nFor Ollama users:\n1. Try: ollama serve --host 0.0.0.0\n2. Or set OLLAMA_ORIGINS=* environment variable\n\nFor llama.cpp users:\n1. Make sure server started with --cors flag\n\nError: ${error.message}`;
+                } else {
+                    responseText.value = `❌ Connection error: ${error.message}\nEndpoint: ${serverInfo}`;
+                }
+            }
+        }
+
+        // vLLM-specific test function (checks models endpoint and chat completions)
+        async function testVLLMConnection() {
+            updateStatus('processing', 'Testing vLLM connection...', 'wifi');
+            responseText.value = "Testing vLLM API endpoints...\n\n";
+            
+            try {
+                const apiUrl = baseURL.value.trim() || '';
+                const modelsUrl = apiUrl ? `${apiUrl}/v1/models` : '/v1/models';
+                const chatUrl = apiUrl ? `${apiUrl}/v1/chat/completions` : '/v1/chat/completions';
+                
+                // Test 1: Check /v1/models endpoint
+                responseText.value += "1️⃣ Testing /v1/models endpoint...\n";
+                const modelsResponse = await fetch(modelsUrl, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    mode: 'cors',
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (modelsResponse.ok) {
+                    const modelsData = await modelsResponse.json();
+                    const modelsList = modelsData.data?.map(m => m.id).join(', ') || 'No models listed';
+                    responseText.value += `✅ Models endpoint OK\n   Available models: ${modelsList}\n\n`;
+                } else {
+                    responseText.value += `⚠️  Models endpoint returned: ${modelsResponse.status}\n\n`;
+                }
+                
+                // Test 2: Check /v1/chat/completions with simple request
+                responseText.value += "2️⃣ Testing /v1/chat/completions endpoint...\n";
+                const chatResponse = await fetch(chatUrl, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    mode: 'cors',
+                    signal: AbortSignal.timeout(10000),
+                    body: JSON.stringify({
+                        model: modelSelect.value,
+                        max_tokens: 10,
+                        messages: [{ role: 'user', content: 'Hello' }]
+                    })
+                });
+                
+                if (chatResponse.ok) {
+                    const chatData = await chatResponse.json();
+                    responseText.value += `✅ Chat completions endpoint OK\n   Response: ${chatData.choices?.[0]?.message?.content || 'Got valid response'}\n\n`;
+                    responseText.value += `🎉 vLLM is ready! All tests passed.\n`;
+                    updateStatus('ready', 'vLLM connection successful', 'check-circle');
+                } else {
+                    const errorText = await chatResponse.text();
+                    responseText.value += `❌ Chat endpoint error: ${chatResponse.status}\n   ${errorText}\n`;
+                    updateStatus('error', 'vLLM chat endpoint error', 'exclamation-triangle');
+                }
+                
+            } catch (error) {
+                console.error('vLLM test error:', error);
+                responseText.value += `\n❌ Test failed: ${error.message}\n\n`;
+                responseText.value += `Troubleshooting for vLLM on OpenShift:\n`;
+                responseText.value += `• Verify vLLM is running: kubectl get pods -n <vllm-namespace>\n`;
+                responseText.value += `• Check service: kubectl get svc -n <vllm-namespace>\n`;
+                responseText.value += `• Test locally: curl http://<service>:8000/v1/models\n`;
+                responseText.value += `• Ensure route/ingress proxies /v1/* to vLLM service\n`;
+                updateStatus('error', 'vLLM connection failed', 'exclamation-triangle');
+            }
+        }
+
+        // Theme management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = themeToggle.querySelector('i');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        // Status indicator management
+        function updateStatus(type, message, icon = 'circle') {
+            statusIndicator.className = `status-indicator status-${type}`;
+            statusIndicator.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+            
+            if (type === 'processing') {
+                statusIndicator.classList.add('pulse');
+            } else {
+                statusIndicator.classList.remove('pulse');
+            }
+        }
+
+        // Returns response text (string)
+        async function sendChatCompletionRequest(instruction, imageBase64URL) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+            
+            try {
+                // Build API URL - use relative path if baseURL is empty (for proxy)
+                const apiUrl = baseURL.value.trim() ? `${baseURL.value}/v1/chat/completions` : '/v1/chat/completions';
+                console.log('Sending request to:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    mode: 'cors', // Explicitly set CORS mode
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        model: modelSelect.value,
+                        max_tokens: 100,  // Increased for explanation
+                        temperature: 0,  // Zero temperature for maximum determinism - crucial for YES/NO responses
+                        messages: [
+                            { role: 'user', content: [
+                                { type: 'text', text: instruction },
+                                { type: 'image_url', image_url: {
+                                    url: imageBase64URL,
+                                } }
+                            ] },
+                        ]
+                    })
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    const errorData = await response.text();
+                    console.error('Server error response:', response.status, errorData);
+                    return `Server error: ${response.status} - ${errorData}`;
+                }
+                
+                const data = await response.json();
+                console.log('Successful response received');
+                return data.choices[0].message.content;
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.error('Fetch error details:', error);
+                
+                if (error.name === 'AbortError') {
+                    return 'Request timed out after 30 seconds. Please check your API endpoint and network connection.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    return `Failed to connect to API endpoint. Please check:\n1. Is the vLLM/API server running?\n2. Is the endpoint URL correct? (vLLM typically uses port 8000)\n3. For OpenShift: Is the service route configured correctly?\n4. Are you experiencing network issues?\n5. Does the server support CORS?\n\nEndpoint: ${baseURL.value || 'proxy endpoint'}\nError: ${error.message}`;
+                } else {
+                    return `Network error: ${error.message}`;
+                }
+            }
+        }
+
+        // Camera initialization
+        async function initCamera() {
+            try {
+                updateStatus('processing', 'Requesting camera access...', 'camera');
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                video.srcObject = stream;
+                
+                // Check if API endpoint is set
+                if (!baseURL.value.trim()) {
+                    updateStatus('ready', 'Camera ready - Using proxy endpoint', 'check-circle');
+                    responseText.value = "Camera access granted. Using proxy endpoint for API calls. Ready to start processing.";
+                } else {
+                    updateStatus('ready', 'Camera ready - Click start to begin', 'check-circle');
+                    responseText.value = "Camera access granted. Ready to start processing.";
+                }
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+                updateStatus('error', 'Camera access denied', 'exclamation-triangle');
+                responseText.value = `Error accessing camera: ${err.name} - ${err.message}. Please ensure permissions are granted and you are on HTTPS or localhost.`;
+                
+                // Show user-friendly error message
+                if (err.name === 'NotAllowedError') {
+                    responseText.value = "Camera access was denied. Please allow camera permissions and refresh the page.";
+                } else if (err.name === 'NotFoundError') {
+                    responseText.value = "No camera found. Please connect a camera and refresh the page.";
+                } else {
+                    responseText.value = `Camera error: ${err.message}. Please check your camera and try again.`;
+                }
+            }
+        }
+
+        function captureImage() {
+            if (!stream || !video.videoWidth) {
+                console.warn("Video stream not ready for capture.");
+                return null;
+            }
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/jpeg', 0.8); // Use JPEG for smaller size, 0.8 quality
+        }
+
+        async function sendData() {
+            if (!isProcessing) return;
+
+            const instruction = instructionText.value;
+            const imageBase64URL = captureImage();
+
+            if (!imageBase64URL) {
+                updateStatus('error', 'Failed to capture image', 'exclamation-triangle');
+                responseText.value = "Failed to capture image. Stream might not be active.";
+                return;
+            }
+
+            try {
+                updateStatus('processing', 'Processing with AI...', 'brain');
+                console.log('📤 Sending instruction to AI:', instruction);
+                const response = await sendChatCompletionRequest(instruction, imageBase64URL);
+                console.log('📥 AI Response:', response);
+                responseText.value = response;
+                
+                // Check if we have an active challenge and the AI said yes
+                if (gameState.currentChallenge) {
+                    const normalizedResponse = response.toLowerCase().trim();
+                    const mode = gameState.currentMode;
+                    const challengeText = gameState.currentChallenge.text.toLowerCase();
+                    
+                    // Determine if this is an open-ended question or YES/NO
+                    const isOpenEnded = 
+                        challengeText.includes('what colors') ||
+                        challengeText.includes('how many') ||
+                        challengeText.includes('count');
+                    
+                    let isSuccess = false;
+                    
+                    if (!isOpenEnded) {
+                        // For YES/NO questions - Check for explicit YES or positive descriptions
+                        // Primary check: Look for YES at the start
+                        isSuccess = normalizedResponse.match(/^yes\b/i) || // Starts with YES
+                                   normalizedResponse.match(/^yes\s*-/i) || // YES - format
+                                   normalizedResponse.match(/^yes\s*,/i); // YES, format
+                        
+                        // Fallback: If AI describes seeing the item but didn't say YES, infer success
+                        if (!isSuccess && normalizedResponse.length < 100) {
+                            // Check for positive affirmative patterns
+                            const affirmativePatterns = [
+                                /\b(i see|i can see|there is|there are|i do see|i spot)\b/i,
+                                /\b(holding|showing|displaying|presenting|has)\s+(?:a|an|the)?\s*\w+/i,
+                                /\b(visible|present|appears|looks like)\b/i,
+                                /person\s+(?:is|with|holding|has)/i,
+                                /\b(?:is|are)\s+(?:a|an|some|the)?\s*\w+(?:\s+\w+)?\s+(?:in|on|visible)/i
+                            ];
+                            
+                            for (const pattern of affirmativePatterns) {
+                                if (normalizedResponse.match(pattern)) {
+                                    isSuccess = true;
+                                    console.log('✅ Inferred YES from description:', normalizedResponse);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // Double-check: If response contains "no" or "not" or "don't", it's definitely NO
+                        if (normalizedResponse.match(/\b(no|not|don't|cannot|can't|do not)\b/i)) {
+                            isSuccess = false;
+                            console.log('❌ Found negative keywords, overriding to NO');
+                        }
+                        
+                        console.log('🔍 Response validation:', {
+                            response: normalizedResponse,
+                            isSuccess: isSuccess,
+                            reason: isSuccess ? 'Affirmative detected' : 'No affirmative found (default: NO)'
+                        });
+                    }
+                    
+                    if (isSuccess) {
+                        // Award points!
+                        const points = gameState.currentChallenge.points;
+                        updateScore(points);
+                        
+                        // Show success message with AI's explanation
+                        responseText.value = `✅ AI SAYS YES!\n\n${response}\n\n🎉 AWESOME! You earned ${points} points!\n\nPick another challenge to continue!`;
+                        
+                        // Clear the active challenge
+                        document.querySelectorAll('.challenge-card').forEach(c => c.classList.remove('active'));
+                        gameState.currentChallenge = null;
+                        
+                        // Hide and reset manual button
+                        const manualBtn = document.getElementById('manualCompleteBtn');
+                        manualBtn.style.display = 'none';
+                        manualBtn.style.animation = '';
+                        
+                        // Update status
+                        updateStatus('ready', '🎉 Challenge complete! Pick another!', 'star');
+                    } else {
+                        // For open-ended questions or if not successful
+                        if (isOpenEnded) {
+                            responseText.value = `📝 AI's Answer:\n\n${response}\n\n👀 Check if this is correct! If yes, click the green ✅ button below to award points.`;
+                            updateStatus('ready', '👀 Check the AI\'s answer! Click ✅ button if correct.', 'play-circle');
+                        } else {
+                            responseText.value = `❌ AI SAYS NO\n\n${response}\n\n🔍 Keep trying! Show the item/action to the camera.`;
+                            updateStatus('ready', '🔍 Keep trying!', 'play-circle');
+                        }
+                    }
+                } else {
+                updateStatus('ready', 'Processing active', 'play-circle');
+                }
+            } catch (error) {
+                console.error('Error sending data:', error);
+                updateStatus('error', 'API request failed', 'exclamation-triangle');
+                responseText.value = `Error: ${error.message}`;
+            }
+        }
+
+        function handleStart() {
+            if (!stream) {
+                updateStatus('error', 'Camera not available', 'exclamation-triangle');
+                responseText.value = "Camera not available. Please grant permission first.";
+                return;
+            }
+            
+            // Check if a challenge is selected
+            if (!gameState.currentChallenge) {
+                showChallengePrompt();
+                return;
+            }
+            
+            // Allow empty endpoint for OpenShift proxy setup
+            const endpoint = baseURL.value.trim();
+            if (!endpoint) {
+                console.log('Using proxy endpoint (empty baseURL)');
+            }
+            
+            // Clear any pending leaderboard data from previous game
+            pendingLeaderboardData = null;
+
+            isProcessing = true;
+            
+            // Start game timer
+            startGameTimer();
+            
+            // Update button appearance
+            startButton.innerHTML = '<i class="fas fa-stop"></i><span>Stop Game</span>';
+            startButton.classList.remove('btn-primary');
+            startButton.classList.add('btn-danger');
+
+            // Disable controls
+            instructionText.disabled = true;
+            modelSelect.disabled = true;
+            intervalSelect.disabled = true;
+            baseURL.disabled = true;
+
+            updateStatus('processing', '🎮 Game started! Have fun!', 'play-circle');
+            responseText.value = "🎮 Let's play! Pick a challenge and show me! 🎉";
+
+            const intervalMs = parseInt(intervalSelect.value, 10);
+            
+            // Initial immediate call
+            sendData(); 
+            
+            // Then set interval
+            intervalId = setInterval(sendData, intervalMs);
+        }
+
+        function handleStop() {
+            isProcessing = false;
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            
+            // Stop game timer
+            stopGameTimer();
+            
+            // Calculate elapsed time
+            const elapsedSeconds = gameState.startTime ? Math.floor((Date.now() - gameState.startTime) / 1000) : 0;
+            const timeString = formatTime(elapsedSeconds);
+            
+            // Save current score before resetting
+            const finalScore = gameState.score;
+            const finalChallenges = gameState.challengesCompleted;
+            const finalStreak = gameState.streak;
+            
+            // Update button appearance
+            startButton.innerHTML = '<i class="fas fa-play"></i><span>Start Game</span>';
+            startButton.classList.remove('btn-danger');
+            startButton.classList.add('btn-primary');
+
+            // Enable controls
+            instructionText.disabled = false;
+            modelSelect.disabled = false;
+            intervalSelect.disabled = false;
+            baseURL.disabled = false;
+
+            updateStatus('ready', '🎯 Ready for next round!', 'check-circle');
+            
+            // Reset game state for next round
+            gameState.score = 0;
+            gameState.challengesCompleted = 0;
+            gameState.streak = 0;
+            gameState.completedChallenges.clear();
+            gameState.currentChallenge = null;
+            
+            // Update display
+            document.getElementById('totalScore').textContent = '0';
+            document.getElementById('challengesCompleted').textContent = '0';
+            document.getElementById('currentStreak').textContent = '0';
+            
+            // Generate fresh challenges
+            generateNewChallenges();
+            
+            // If player scored points, show cartoon modal for name input
+            if (finalScore > 0) {
+                showNameModal(finalScore, finalChallenges, finalStreak, timeString);
+            } else {
+                responseText.value = "Ready to play! Pick a challenge and click Start! 🎮";
+            }
+        }
+
+        // Event listeners
+        startButton.addEventListener('click', () => {
+            if (isProcessing) {
+                handleStop();
+            } else {
+                handleStart();
+            }
+        });
+
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        // Listen for manual endpoint changes
+        baseURL.addEventListener('input', () => {
+            updateModelSelectionVisibility(baseURL.value);
+        });
+
+        // Add fade-in animation to cards
+        function addFadeInAnimation() {
+            const cards = document.querySelectorAll('.video-section, .controls-section, .input-card, .header');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+        }
+
+        // Initialize everything when the page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initCamera();
+            addFadeInAnimation();
+            // Initialize model selection visibility based on default endpoint
+            updateModelSelectionVisibility(baseURL.value);
+            // Initialize leaderboard display
+            displayLeaderboard();
+        });
+
+        // Cleanup when page is closed/navigated away
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Close challenge prompt modal with ESC or Enter
+            const challengeModal = document.getElementById('challengePromptModal');
+            if (challengeModal && challengeModal.style.display === 'flex') {
+                if (e.key === 'Escape' || e.key === 'Enter') {
+                    closeChallengePrompt();
+                    return;
+                }
+            }
+            
+            if (e.key === ' ' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+                if (isProcessing) {
+                    handleStop();
+                } else {
+                    handleStart();
+                }
+            }
+            if (e.key === 'Escape' && isProcessing) {
+                handleStop();
+            }
+        });
+
+    </script>
+</body>
+</html>

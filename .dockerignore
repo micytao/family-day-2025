@@ -1,0 +1,12 @@
+# Ignore development files
+index.html
+*.md
+.git
+.gitignore
+deploy-to-openshift.sh
+
+# Keep only production files
+!prod-index.html
+!redhat.png
+!Containerfile
+
