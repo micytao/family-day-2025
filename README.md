@@ -2,8 +2,6 @@
 
 An interactive AI-powered vision game for Red Hat Family Day 2025! Kids and families can play fun challenges where they show objects, make faces, and do poses to the camera, and the AI judges whether they succeed.
 
-![Red Hat Family Day](redhat.png)
-
 ## 🎮 Game Preview
 
 ![Game Screenshot](game.png)
