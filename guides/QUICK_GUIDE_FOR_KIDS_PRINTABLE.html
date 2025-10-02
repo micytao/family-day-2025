@@ -8,155 +8,277 @@
         @media print {
             @page {
                 size: A4;
-                margin: 1in;
+                margin: 0.45in;
             }
             body {
                 print-color-adjust: exact;
                 -webkit-print-color-adjust: exact;
             }
+            h1 {
+                color: #c084fc !important;
+                -webkit-text-fill-color: #c084fc !important;
+                background: none !important;
+                text-shadow: none !important;
+            }
+            .redhat-title {
+                text-shadow: none !important;
+            }
+            .step {
+                background: white !important;
+                box-shadow: none !important;
+            }
+            .tip-box, .remember-box, .footer {
+                box-shadow: none !important;
+            }
         }
         
         body {
             font-family: 'Comic Sans MS', 'Arial', sans-serif;
-            line-height: 1.6;
-            color: #2d3748;
+            line-height: 1.25;
+            color: #1f2937;
             max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-            background: linear-gradient(to bottom, #fff5f7, #f0f9ff);
+            margin: 8px auto;
+            padding: 10px;
+            background: linear-gradient(135deg, #fef3c7 0%, #dbeafe 50%, #fce7f3 100%);
+            font-size: 12.5px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fee2e2, #fef3c7);
+            padding: 10px;
+            border-radius: 12px;
+            border: 3px solid #dc2626;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+        
+        .header img {
+            height: 45px;
+            display: block;
+            margin: 0 auto 6px auto;
+        }
+        
+        .redhat-title {
+            font-size: 1.7em;
+            color: #dc2626;
+            font-weight: bold;
+            margin: 0 0 2px 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         
         h1 {
-            color: #ff6b9d;
+            background: linear-gradient(135deg, #ff6b9d, #c084fc, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             text-align: center;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.6em;
+            margin: 0;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-weight: bold;
         }
         
         h2 {
             color: #c084fc;
-            font-size: 1.8em;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            border-left: 6px solid #ff6b9d;
-            padding-left: 15px;
-            background: linear-gradient(to right, #fff5f7, transparent);
-            padding: 10px 15px;
-            border-radius: 5px;
+            font-size: 1.3em;
+            margin: 8px 0 5px 0;
+            border-left: 5px solid #ff6b9d;
+            padding: 5px 10px;
+            background: linear-gradient(to right, #fef3c7, #fce7f3);
+            border-radius: 8px;
+            font-weight: bold;
         }
         
         h3 {
-            color: #60a5fa;
-            font-size: 1.3em;
-            margin-top: 20px;
-            margin-bottom: 10px;
+            color: #1f2937;
+            font-size: 1.05em;
+            margin: 4px 0;
+            font-weight: bold;
         }
         
         ul {
             list-style: none;
             padding-left: 0;
+            margin: 5px 0;
         }
         
         li {
-            padding: 8px 0;
-            padding-left: 30px;
+            padding: 2px 0 2px 22px;
             position: relative;
+            color: #374151;
+            font-size: 1em;
         }
         
         li:before {
             content: "⭐";
             position: absolute;
             left: 0;
+            font-size: 0.9em;
         }
         
         strong {
-            color: #ff6b9d;
+            color: #dc2626;
             font-weight: bold;
         }
         
         hr {
             border: none;
-            border-top: 3px dashed #c084fc;
-            margin: 30px 0;
+            border-top: 2px dashed #c084fc;
+            margin: 8px 0;
         }
         
         .tip-box {
             background: linear-gradient(135deg, #fef3c7, #dbeafe);
-            border-left: 5px solid #fbbf24;
-            padding: 15px;
-            margin: 20px 0;
+            border: 3px solid #f59e0b;
+            padding: 8px;
+            margin: 8px 0;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        .tip-box p {
+            margin: 3px 0;
+            color: #1f2937;
         }
         
         .remember-box {
-            background: linear-gradient(135deg, #f0fdf4, #fef3c7);
-            border: 3px solid #4ade80;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #d1fae5, #fef3c7);
+            border: 3px solid #10b981;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 10px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .remember-box h2 {
+            background: none;
+            border: none;
+            color: #059669;
+            margin: 4px 0;
+        }
+        
+        .remember-box p {
+            margin: 4px 0;
+            color: #1f2937;
         }
         
         .footer {
             text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            background: linear-gradient(135deg, #ff6b9d, #c084fc);
+            margin-top: 8px;
+            padding: 8px;
+            background: linear-gradient(135deg, #ff6b9d, #c084fc, #60a5fa);
             color: white;
-            border-radius: 12px;
-            font-size: 1.2em;
+            border-radius: 10px;
+            font-size: 1em;
             font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .footer p {
+            margin: 3px 0;
         }
         
         .step {
+            padding: 6px;
+            margin: 5px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            border: 3px solid;
+        }
+        
+        .step:nth-child(4) {
+            background: linear-gradient(135deg, #fef3c7, #fef9c3);
+            border-color: #f59e0b;
+        }
+        
+        .step:nth-child(5) {
+            background: linear-gradient(135deg, #dbeafe, #e0f2fe);
+            border-color: #3b82f6;
+        }
+        
+        .step:nth-child(6) {
+            background: linear-gradient(135deg, #fce7f3, #fce8f3);
+            border-color: #ec4899;
+        }
+        
+        .step:nth-child(7) {
+            background: linear-gradient(135deg, #d1fae5, #d9f99d);
+            border-color: #10b981;
+        }
+        
+        .step p {
+            margin: 3px 0;
+        }
+        
+        p {
+            margin: 4px 0;
+        }
+        
+        .game-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+        }
+        
+        .game-table td {
+            padding: 3px 6px;
+            width: 50%;
             background: white;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 6px solid #60a5fa;
+            border-radius: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .game-table tr td:first-child {
+            margin-right: 3px;
         }
     </style>
 </head>
 <body>
-    <h1>🎮 Quick Guide for Kids! 🌟</h1>
-    
-    <h2>How to Play in 5 Easy Steps! 🚀</h2>
-    
-    <div class="step">
-        <h3>1️⃣ Click START! 🟢</h3>
-        <p>Click the big green <strong>"Start Game"</strong> button!</p>
+    <div class="header">
+        <img src="../assets/redhat.png" alt="Red Hat">
+        <p class="redhat-title">Red Hat Family Day 2025</p>
+        <h1>🎮 Quick Guide for Kids! 🌟</h1>
     </div>
     
+    <h2>How to Play in 4 Easy Steps! 🚀</h2>
+    
     <div class="step">
-        <h3>2️⃣ Pick Your Game! 🎯</h3>
+        <h3>1️⃣ Pick Your Game! 🎯</h3>
         <p>Choose what you want to play:</p>
-        <ul>
-            <li>🔍 Find things (Scavenger Hunt)</li>
-            <li>😊 Make faces (Emotions)</li>
-            <li>🎨 Show colors (Colors)</li>
-            <li>🔢 Count things (Counting)</li>
-            <li>🤸 Do actions (Actions)</li>
-            <li>✋ Show body parts (Body Parts)</li>
-            <li>🧘 Try poses (Yoga)</li>
-        </ul>
+        <table class="game-table">
+            <tr>
+                <td>🔍 Find things (Scavenger Hunt)</td>
+                <td>😊 Make faces (Emotions)</td>
+            </tr>
+            <tr>
+                <td>🎨 Show colors (Colors)</td>
+                <td>🔢 Count things (Counting)</td>
+            </tr>
+            <tr>
+                <td>🤸 Do actions (Actions)</td>
+                <td>✋ Show body parts (Body Parts)</td>
+            </tr>
+            <tr>
+                <td colspan="2">🧘 Try poses (Yoga)</td>
+            </tr>
+        </table>
     </div>
     
     <div class="step">
-        <h3>3️⃣ Pick a Challenge! 🎴</h3>
+        <h3>2️⃣ Pick a Challenge! 🎴</h3>
         <p>Click a colorful card to try it!</p>
     </div>
     
     <div class="step">
-        <h3>4️⃣ Show the Camera! 📸</h3>
+        <h3>3️⃣ Show the Camera! 📸</h3>
         <p>Do what the card says and show it to the camera!</p>
     </div>
     
     <div class="step">
-        <h3>5️⃣ Get Points! ⭐</h3>
+        <h3>4️⃣ Get Points! ⭐</h3>
         <p>When the AI says YES, you WIN! 🎉</p>
     </div>
     
@@ -187,20 +309,11 @@
     
     <div class="remember-box">
         <h2>Remember! 💪</h2>
-        <p><strong>The AI robot is learning too!</strong></p>
-        <p>Sometimes it says YES ✅</p>
-        <p>Sometimes it says NO ❌</p>
-        <p>Both are OK! Just keep playing! 🎮</p>
-        <p style="font-size: 1.3em; margin-top: 20px;"><strong>You're AWESOME just for trying!</strong> ⭐</p>
+        <p><strong>The AI is learning too! Sometimes YES ✅ Sometimes NO ❌ Both are OK! You're AWESOME! ⭐</strong></p>
     </div>
     
     <div class="footer">
-        <p>Now GO PLAY and HAVE FUN! 🚀✨</p>
-        <p style="font-size: 0.9em; margin-top: 10px;">Made with ❤️ for Red Hat Family Day 2025! 🎩</p>
-    </div>
-    
-    <div style="text-align: center; margin-top: 20px; color: #718096; font-size: 0.9em;">
-        <p><strong>To save as PDF:</strong> Press Ctrl+P (Windows) or Cmd+P (Mac) and choose "Save as PDF"</p>
+        <p>GO PLAY and HAVE FUN! 🚀✨ Made with ❤️ for Red Hat Family Day 2025! 🎩</p>
     </div>
 </body>
 </html>
