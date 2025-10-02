@@ -2,6 +2,14 @@
 
 An interactive AI-powered vision game for Red Hat Family Day 2025! Kids and families can play fun challenges where they show objects, make faces, and do poses to the camera, and the AI judges whether they succeed.
 
+## 📚 For Kids & Families
+
+**New to the game?** Check out our kid-friendly guides:
+- 🎮 **[HOW TO PLAY - Full Guide](HOW_TO_PLAY.md)** - Complete instructions with fun visuals!
+- ⚡ **[Quick Guide for Kids](QUICK_GUIDE_FOR_KIDS.md)** - Short & simple one-page version!
+
+Perfect for kids ages 5-10! 🌟
+
 ## 🎮 Game Preview
 
 ![Game Screenshot](game.png)
