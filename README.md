@@ -5,14 +5,15 @@ An interactive AI-powered vision game for Red Hat Family Day 2025! Kids and fami
 ## 📚 For Kids & Families
 
 **New to the game?** Check out our kid-friendly guides:
-- 🎮 **[HOW TO PLAY - Full Guide](HOW_TO_PLAY.md)** - Complete instructions with fun visuals!
-- ⚡ **[Quick Guide for Kids](QUICK_GUIDE_FOR_KIDS.md)** - Short & simple one-page version!
+- 🎮 **[HOW TO PLAY - Full Guide](guides/HOW_TO_PLAY.md)** - Complete instructions with fun visuals!
+- ⚡ **[Quick Guide for Kids](guides/QUICK_GUIDE_FOR_KIDS.md)** - Short & simple one-page version!
+- 🖨️ **[Printable HTML Guide](guides/QUICK_GUIDE_FOR_KIDS_PRINTABLE.html)** - Beautiful print-ready version!
 
 Perfect for kids ages 5-10! 🌟
 
 ## 🎮 Game Preview
 
-![Game Screenshot](game.png)
+![Game Screenshot](assets/game.png)
 
 **Features shown:**
 - 🎯 Real-time scoring and challenges
@@ -93,28 +94,38 @@ python -m http.server 8000
 open http://localhost:8000
 ```
 
-See [QUICK_START.md](QUICK_START.md) for detailed setup.
+See [QUICK_START.md](docs/QUICK_START.md) for detailed setup.
 
-## 📁 Files
+## 📁 Project Structure
 
-### Main Files
-- **`prod-index.html`** - Production version with vLLM integration and Qwen2-VL-2B
-- **`index.html`** - Development version for local testing
-- **`redhat.png`** - Red Hat logo for branding
+```
+family-day-2025/
+├── 📂 src/                    Source files
+│   ├── prod-index.html        🚀 Production game (use this!)
+│   └── index.html             Development version
+├── 📂 guides/                 Kid-friendly guides (ages 5-10)
+│   ├── HOW_TO_PLAY.md
+│   ├── QUICK_GUIDE_FOR_KIDS.md
+│   └── QUICK_GUIDE_FOR_KIDS_PRINTABLE.html
+├── 📂 docs/                   Technical documentation
+│   ├── PRODUCTION_DEPLOYMENT.md
+│   ├── CONTAINER_DEPLOYMENT.md
+│   ├── QUICK_START.md
+│   └── ...more docs
+├── 📂 scripts/               Automation scripts
+│   ├── build-container.sh
+│   └── deploy-to-openshift.sh
+├── 📂 config/                Configuration files
+│   ├── Containerfile
+│   └── rhaiis-deployment.yml
+├── 📂 assets/                Images and media
+│   ├── game.png
+│   └── redhat.png
+├── CHANGELOG.md              Version history
+└── README.md                 You are here!
+```
 
-### Deployment Files
-- **`deploy-to-openshift.sh`** - Automated OpenShift deployment script
-- **`build-container.sh`** - Container build script
-- **`Containerfile`** - Container image definition with nginx proxy
-- **`rhaiis-deployment.yml`** - RHAIIS/vLLM deployment configuration
-
-### Documentation
-- **`PRODUCTION_README.md`** - Quick production deployment guide
-- **`PRODUCTION_DEPLOYMENT.md`** - Detailed production setup
-- **`CONTAINER_DEPLOYMENT.md`** - Container image documentation
-- **`QUICK_START.md`** - Local development guide
-- **`DEV_VS_PROD.md`** - Comparison of dev vs prod versions
-- **`CHANGELOG.md`** - Version history and changes
+**📖 Each folder has its own README with detailed information!**
 
 ## 🎯 How It Works
 

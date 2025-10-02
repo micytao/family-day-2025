@@ -18,7 +18,7 @@ echo ""
 # Build the container using podman (or docker)
 if command -v podman &> /dev/null; then
     echo "Using podman to build..."
-    podman build -t ${FULL_IMAGE} -f Containerfile .
+    podman build -t ${FULL_IMAGE} -f config/Containerfile .
     echo ""
     echo "✅ Container built successfully!"
     echo ""
@@ -36,7 +36,7 @@ if command -v podman &> /dev/null; then
     echo "   oc expose svc/family-day-web-prod"
 elif command -v docker &> /dev/null; then
     echo "Using docker to build..."
-    docker build -t ${FULL_IMAGE} -f Containerfile .
+    docker build -t ${FULL_IMAGE} -f config/Containerfile .
     echo ""
     echo "✅ Container built successfully!"
     echo ""

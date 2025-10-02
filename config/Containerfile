@@ -17,8 +17,8 @@ RUN mkdir -p /app/web /tmp/nginx /tmp/nginx/client_temp /tmp/nginx/proxy_temp \
     && chown -R 101:101 /app/web /tmp/nginx
 
 # Copy production HTML file and assets
-COPY prod-index.html /app/web/index.html
-COPY redhat.png /app/web/redhat.png
+COPY src/prod-index.html /app/web/index.html
+COPY assets/redhat.png /app/web/redhat.png
 
 # Create nginx configuration for production
 RUN cat > /etc/nginx/nginx.conf << 'EOF'
