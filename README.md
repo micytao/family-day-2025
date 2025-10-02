@@ -4,6 +4,17 @@ An interactive AI-powered vision game for Red Hat Family Day 2025! Kids and fami
 
 ![Red Hat Family Day](redhat.png)
 
+## 🎮 Game Preview
+
+![Game Screenshot](game.png)
+
+**Features shown:**
+- 🎯 Real-time scoring and challenges
+- 🤖 AI-powered vision analysis with explanations
+- 🏆 Live leaderboard
+- 🎨 Beautiful, kid-friendly interface
+- ⏱️ Game timer and streak tracking
+
 ## 🌟 Features
 
 ### 🎮 Multiple Game Modes
